@@ -246,8 +246,8 @@ mathjax:
 # Duoshuo ShortName
 #duoshuo_shortname:
 
-# Disqus
-#disqus_shortname:
+#Disqus
+disqus_shortname: blog-alphaboom-cn
 
 # Baidu Share
 # Available value:

@@ -13,7 +13,8 @@ avatar: /uploads/avatar.jpeg
 
 
 #plugin
-duoshuo_shortname: alphaboom
+# duoshuo_shortname: alphaboom
+disqus_shortname: blog-alphaboom-cn
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
@@ -74,7 +75,7 @@ theme: next
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repository: https://github.com/AlphaBoom/alphaboom.github.io.git
+  repository: git@github.com:AlphaBoom/alphaboom.github.io.git
   branch: master
 
 social:
