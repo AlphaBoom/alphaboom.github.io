@@ -206,3 +206,46 @@ nohup python servers.py &
 # 结束
 
 http://ss.alphaboom.cn/ 完成
+
+# 补充多节点的配置方式
+
+多节点配置方式就是多个后端使用一个前端，具体步骤如下：
+
+* 在新的服务器上安装Shadowsocks多用户后端shadowsocks-manyuser（参考上面的步骤），需要注意的地方是，数据库的配置。上面后台和前端都在同一个服务器上，这次会有些不同：
+
+```
+#Config
+MYSQL_HOST = '104.238.135.97'#使用前端使用服务器的ip
+MYSQL_PORT = 3306
+MYSQL_USER = 'root'
+MYSQL_PASS = 'password'
+MYSQL_DB = 'shadowsocks'
+```
+
+这里是远程连接所以需要在前端的服务器上开启远程连接的权限
+
+```
+GRANT ALL PRIVILEGES ON `shadowsocks`.* TO 'test'@'66.66.66.66' IDENTIFIED BY 'qq123456' WITH GRANT OPTION;
+```
+
+在新的节点服务上就可以使用名为test，密码为qq123456的用户来操作名为shadowsocks数据库了（这个用户要对应，新节点的配置信息）
+之后开放3306端口：
+
+```
+iptables -I INPUT -p tcp -m tcp --dport 3306 -j ACCEPT
+iptables-save
+```
+
+* 然后就可以在前端新增节点了。如果要记录新节点的流量信息要修改,新节点服务器的如下配置
+
+```
+API_URL = 'http://domain/mu'//domain修改为自己设定的域名我这里为ss.alphaboom.cn
+API_PASS = 'mupass'//修改为前端配置的mukey，我们之前设置叫MyMuKey
+NODE_ID = '1'#修改这个ID为新节点的id，增加了一个，所以这里应该改为2，前端后台也可以看到节点id值
+CHECKTIME = 15
+SYNCTIME = 600
+#如果修改无效可以尝试放开下面的注释，默认应该是开启的
+#API_ENABLED = True 
+```
+
+到这里节点配置完毕
