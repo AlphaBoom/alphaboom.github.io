@@ -247,8 +247,15 @@ mathjax:
 #duoshuo_shortname:
 
 #Disqus
-disqus_shortname: blog-alphaboom-cn
-
+#disqus_shortname: blog-alphaboom-cn
+gitalk:
+  enable: true
+  githubID: alphaboom  # 例：asdfv1929   
+  repo: alphaboom.github.io   # 例：asdfv1929.github.io
+  ClientID: a6a9a35cef5cdbb6edde
+  ClientSecret: 3f2c90685ef385c63cb4bc8de7d8745a9d359091
+  adminUser: alphaboom #指定可初始化评论账户
+  distractionFreeMode: true
 # Baidu Share
 # Available value:
 #    button | slide

@@ -18,6 +18,8 @@
           <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a>
         </noscript>
       </div>
+    {% elseif theme.gitalk.enable %}
+      <div id="gitalk-container"></div>
     {% endif %}
   </div>
 {% endif %}
