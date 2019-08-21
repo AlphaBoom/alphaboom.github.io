@@ -1,0 +1,712 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="I don't know">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2">
+
+
+
+
+
+
+<meta name="description" content="想看看shadowsocks多用户使用情况，然后发现这方面已经很成熟了。下面尝试走下这个成熟的流程  SS-Panel前端站点搭建 以下流程使用域名ss.alphaboom.cn 作为示例  PHP环境搭建配置Nginx环境，使用lnpm一键安装包搭建所需要的环境。安装好环境之后再创建虚拟机，上面链接里都有操作步骤。（没有证书注意不要创建https的）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ss-panel配合shadowsocks-manyuser搭建多用户shadowsocks站点">
+<meta property="og:url" content="http://yoursite.com/2017/05/30/ss-panel配合shadowsocks-manyuser搭建多用户shadowsocks站点/index.html">
+<meta property="og:site_name" content="AlphaBoom">
+<meta property="og:description" content="想看看shadowsocks多用户使用情况，然后发现这方面已经很成熟了。下面尝试走下这个成熟的流程  SS-Panel前端站点搭建 以下流程使用域名ss.alphaboom.cn 作为示例  PHP环境搭建配置Nginx环境，使用lnpm一键安装包搭建所需要的环境。安装好环境之后再创建虚拟机，上面链接里都有操作步骤。（没有证书注意不要创建https的）">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-08-21T15:14:51.684Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ss-panel配合shadowsocks-manyuser搭建多用户shadowsocks站点">
+<meta name="twitter:description" content="想看看shadowsocks多用户使用情况，然后发现这方面已经很成熟了。下面尝试走下这个成熟的流程  SS-Panel前端站点搭建 以下流程使用域名ss.alphaboom.cn 作为示例  PHP环境搭建配置Nginx环境，使用lnpm一键安装包搭建所需要的环境。安装好环境之后再创建虚拟机，上面链接里都有操作步骤。（没有证书注意不要创建https的）">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/05/30/ss-panel配合shadowsocks-manyuser搭建多用户shadowsocks站点/">
+
+
+  <title> ss-panel配合shadowsocks-manyuser搭建多用户shadowsocks站点 | AlphaBoom </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">AlphaBoom</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个世界需要更多英雄😁</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                ss-panel配合shadowsocks-manyuser搭建多用户shadowsocks站点
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-05-30T04:51:22+08:00" content="2017-05-30">
+              2017-05-30
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>想看看shadowsocks多用户使用情况，然后发现这方面已经很成熟了。下面尝试走下这个成熟的流程</p>
+</blockquote>
+<h1 id="SS-Panel前端站点搭建"><a href="#SS-Panel前端站点搭建" class="headerlink" title="SS-Panel前端站点搭建"></a>SS-Panel前端站点搭建</h1><blockquote>
+<p>以下流程使用域名ss.alphaboom.cn 作为示例</p>
+</blockquote>
+<h2 id="PHP环境搭建"><a href="#PHP环境搭建" class="headerlink" title="PHP环境搭建"></a>PHP环境搭建</h2><p>配置Nginx环境，使用<a href="https://blog.linuxeye.cn/31.html" target="_blank" rel="noopener">lnpm一键安装包</a>搭建所需要的环境。<br>安装好环境之后再创建虚拟机，上面链接里都有操作步骤。（没有证书注意不要创建https的）<br><a id="more"></a></p>
+<h2 id="SS-Panel前端搭建"><a href="#SS-Panel前端搭建" class="headerlink" title="SS-Panel前端搭建"></a>SS-Panel前端搭建</h2><p>1.进入网站目录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd /data/wwwroot/ss.alphaboom.cn/</span><br></pre></td></tr></table></figure>
+<p>2.下载代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/orvice/ss-panel.git .</span><br></pre></td></tr></table></figure>
+<p>3.修改文件权限</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">find /data/wwwroot/ss.alphaboom.cn -type f -exec chmod 644 &#123;&#125; \;   #为了安全，将代码里面文件权限设置为644</span><br><span class="line">find /data/wwwroot/ss.alphaboom.cn -type d -exec chmod 755 &#123;&#125; \;   #为了安全，将代码里面目录权限设置为755</span><br><span class="line">chown -R www.www /data/wwwroot/ss.alphaboom.cn/</span><br></pre></td></tr></table></figure>
+<p>4.nginx 设置</p>
+<blockquote>
+<p>如果使用上面脚本默认的目录，那么配置文件就在/usr/local/nginx/conf/vhost/ss.alphaboom.cn.conf</p>
+</blockquote>
+<p>在配置文件找到 root 那行 修改成如下形式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root /data/wwwroot/ss.alphaboom.cn/public;</span><br></pre></td></tr></table></figure>
+<p>然后再下方空白处加上如下代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location / &#123;</span><br><span class="line">   try_files $uri $uri/ /index.php$is_args$args;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>5.导入数据库</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql -u root -p</span><br><span class="line">mysql&gt; create database shadowsocks</span><br><span class="line">mysql&gt; use shadowsocks;</span><br><span class="line">mysql&gt; source db.sql;</span><br><span class="line">mysql&gt; flush privileges;</span><br></pre></td></tr></table></figure>
+<p>这个地方之后我有遇到<code>is not allowed to connect to this MySQL server</code>的错误，可以通过该表法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql -u root -p</span><br><span class="line">mysql&gt;use mysql;</span><br><span class="line">mysql&gt;update user set host = ‘%’ where user = ‘root’;</span><br><span class="line">mysql&gt;select host, user from user;</span><br></pre></td></tr></table></figure>
+<p>6.修改配置信息<br>先复制一份模板，为配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp .env.example .env</span><br></pre></td></tr></table></figure>
+<p>然后修改配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim .env</span><br></pre></td></tr></table></figure>
+<p>首先修改数据库内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">db_driver = &apos;mysql&apos;</span><br><span class="line">db_host = &apos;localhost&apos;</span><br><span class="line">db_port = &apos;3306&apos;</span><br><span class="line">db_database = &apos;shadowsocks&apos;</span><br><span class="line">db_username = &apos;root&apos;</span><br><span class="line">db_password = &apos;password&apos;</span><br><span class="line">db_charset = &apos;utf8&apos;</span><br><span class="line">db_collation = &apos;utf8_general_ci&apos;</span><br><span class="line">db_prefix = &apos;&apos;</span><br></pre></td></tr></table></figure>
+<p>其他一些可以修改的部分</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// !!! 修改此key为随机字符串确保网站安全 !!!</span><br><span class="line">key = &apos;jdksjskdkjionqoskz&apos;</span><br><span class="line">env = &apos;prod&apos;  // 正式环境请保持env为prod确保安全</span><br><span class="line">debug =  &apos;false&apos;  //  正式环境请确保为false</span><br><span class="line">appName = &apos;Anarchy ss&apos;             //站点名称</span><br><span class="line">baseUrl = &apos;http://ss.alphaboom.cn&apos;  </span><br><span class="line"></span><br><span class="line">// mu key 用于校验ss-go mu的请求</span><br><span class="line">muKey = &apos;MyMuKey&apos; //一会后端配置也会使用到</span><br></pre></td></tr></table></figure>
+<p>7.安装第三方库</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -sS https://getcomposer.org/installer | php</span><br><span class="line">php composer.phar  install</span><br></pre></td></tr></table></figure>
+<p>8.添加管理员用户</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php xcat createAdmin</span><br></pre></td></tr></table></figure>
+<p>9.前端站点安装完毕<br>重新加载下Nginx，最好mysql也重启下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">service nginx reload</span><br><span class="line">service mysql restart</span><br></pre></td></tr></table></figure></p>
+<h1 id="Shadowsocks多用户后端shadowsocks-manyuser"><a href="#Shadowsocks多用户后端shadowsocks-manyuser" class="headerlink" title="Shadowsocks多用户后端shadowsocks-manyuser"></a>Shadowsocks多用户后端shadowsocks-manyuser</h1><h2 id="获取源码"><a href="#获取源码" class="headerlink" title="获取源码"></a>获取源码</h2><blockquote>
+<p><a href="https://github.com/mengskysama/shadowsocks-rm/tree/manyuser" target="_blank" rel="noopener">shadowsocks-rm</a></p>
+</blockquote>
+<p>1.随便找个目录下载源码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone -b manyuser https://github.com/mengskysama/shadowsocks-rm.git</span><br></pre></td></tr></table></figure>
+<p>2.安装pip包管理器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum -y install python-setuptools &amp;&amp; easy_install pip</span><br><span class="line">yum install git -y</span><br></pre></td></tr></table></figure>
+<p>3.安装cymysql</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install cymysql</span><br></pre></td></tr></table></figure>
+<p>4.进入文件夹</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd /shadowsocks-rm/shadowsocks</span><br></pre></td></tr></table></figure>
+<p>5.修改配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim config.py</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">import logging</span><br><span class="line"></span><br><span class="line">#Config</span><br><span class="line">MYSQL_HOST = &apos;mengsky.net&apos;//修改为前端配置的 这里应为 localhost</span><br><span class="line">MYSQL_PORT = 3306</span><br><span class="line">MYSQL_USER = &apos;root&apos;</span><br><span class="line">MYSQL_PASS = &apos;root&apos;//这里修改为真实的密码</span><br><span class="line">MYSQL_DB = &apos;shadowsocks&apos;//前端配置的就是找个名称所以不用修改</span><br><span class="line"></span><br><span class="line">MANAGE_PASS = &apos;passwd&apos;</span><br><span class="line">#if you want manage in other server you should set this value to global ip</span><br><span class="line">MANAGE_BIND_IP = &apos;127.0.0.1&apos;</span><br><span class="line">#make sure this port is idle</span><br><span class="line">MANAGE_PORT = 23333</span><br><span class="line"></span><br><span class="line">PANEL_VERSION = &apos;V3&apos; # V2 or V3. V2 not support API</span><br><span class="line">API_URL = &apos;http://domain/mu&apos;//domain修改为自己设定的域名我这里为ss.alphaboom.cn</span><br><span class="line">API_PASS = &apos;mupass&apos;//修改为前端配置的mukey，我们之前设置叫MyMuKey</span><br><span class="line">NODE_ID = &apos;1&apos;</span><br><span class="line">CHECKTIME = 15</span><br><span class="line">SYNCTIME = 600</span><br><span class="line"></span><br><span class="line">#BIND IP</span><br><span class="line">#if you want bind ipv4 and ipv6 &apos;[::]&apos;</span><br><span class="line">#if you want bind all of ipv4 if &apos;0.0.0.0&apos;</span><br><span class="line">#if you want bind all of if only &apos;4.4.4.4&apos;</span><br><span class="line">SS_BIND_IP = &apos;0.0.0.0&apos;</span><br><span class="line">SS_METHOD = &apos;rc4-md5&apos;</span><br><span class="line"></span><br><span class="line">#LOG CONFIG</span><br><span class="line">LOG_ENABLE = False</span><br><span class="line">LOG_LEVEL = logging.DEBUG</span><br><span class="line">LOG_FILE = &apos;/var/log/shadowsocks.log&apos;</span><br></pre></td></tr></table></figure>
+<h2 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h2><p>先前台启动服务看有没有问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python servers.py</span><br></pre></td></tr></table></figure></p>
+<p>如果有问题根据错误信息修改，然后关掉这个进程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ps -ef | grep servers.py</span><br><span class="line">kill -9 查询到的pid</span><br></pre></td></tr></table></figure>
+<p>没有问题，后台开启服务<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup python servers.py &amp;</span><br></pre></td></tr></table></figure></p>
+<h1 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h1><p><a href="http://ss.alphaboom.cn/" target="_blank" rel="noopener">http://ss.alphaboom.cn/</a> 完成</p>
+<h1 id="补充多节点的配置方式"><a href="#补充多节点的配置方式" class="headerlink" title="补充多节点的配置方式"></a>补充多节点的配置方式</h1><p>多节点配置方式就是多个后端使用一个前端，具体步骤如下：</p>
+<ul>
+<li>在新的服务器上安装Shadowsocks多用户后端shadowsocks-manyuser（参考上面的步骤），需要注意的地方是，数据库的配置。上面后台和前端都在同一个服务器上，这次会有些不同：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#Config</span><br><span class="line">MYSQL_HOST = &apos;104.238.135.97&apos;#使用前端使用服务器的ip</span><br><span class="line">MYSQL_PORT = 3306</span><br><span class="line">MYSQL_USER = &apos;root&apos;</span><br><span class="line">MYSQL_PASS = &apos;password&apos;</span><br><span class="line">MYSQL_DB = &apos;shadowsocks&apos;</span><br></pre></td></tr></table></figure>
+<p>这里是远程连接所以需要在前端的服务器上开启远程连接的权限</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GRANT ALL PRIVILEGES ON `shadowsocks`.* TO &apos;test&apos;@&apos;66.66.66.66&apos; IDENTIFIED BY &apos;qq123456&apos; WITH GRANT OPTION;</span><br></pre></td></tr></table></figure>
+<p>在新的节点服务上就可以使用名为test，密码为qq123456的用户来操作名为shadowsocks数据库了（这个用户要对应，新节点的配置信息）<br>之后开放3306端口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -I INPUT -p tcp -m tcp --dport 3306 -j ACCEPT</span><br><span class="line">iptables-save</span><br></pre></td></tr></table></figure>
+<ul>
+<li>然后就可以在前端新增节点了。如果要记录新节点的流量信息要修改,新节点服务器的如下配置</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">API_URL = &apos;http://domain/mu&apos;//domain修改为自己设定的域名我这里为ss.alphaboom.cn</span><br><span class="line">API_PASS = &apos;mupass&apos;//修改为前端配置的mukey，我们之前设置叫MyMuKey</span><br><span class="line">NODE_ID = &apos;1&apos;#修改这个ID为新节点的id，增加了一个，所以这里应该改为2，前端后台也可以看到节点id值</span><br><span class="line">CHECKTIME = 15</span><br><span class="line">SYNCTIME = 600</span><br><span class="line">#如果修改无效可以尝试放开下面的注释，默认应该是开启的</span><br><span class="line">#API_ENABLED = True</span><br></pre></td></tr></table></figure>
+<p>到这里节点配置完毕</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/04/第2章图形学编程/" rel="next" title="第2章图形学编程">
+                <i class="fa fa-chevron-left"></i> 第2章图形学编程
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/21/GooglePinyin分析/" rel="prev" title="GooglePinyin分析">
+                GooglePinyin分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="gitalk-container"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.jpeg" alt="AlphaBoom">
+          <p class="site-author-name" itemprop="name">AlphaBoom</p>
+          <p class="site-description motion-element" itemprop="description">AlphaBoom的博客欢迎莅临</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/">
+              <span class="site-state-item-count">12</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/AlphaBoom" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="tencent://message/?uin=2439100920&Site=alphaboom.github.io&Menu=yes" target="_blank" title="QQ">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  QQ
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SS-Panel前端站点搭建"><span class="nav-number">1.</span> <span class="nav-text">SS-Panel前端站点搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#PHP环境搭建"><span class="nav-number">1.1.</span> <span class="nav-text">PHP环境搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SS-Panel前端搭建"><span class="nav-number">1.2.</span> <span class="nav-text">SS-Panel前端搭建</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Shadowsocks多用户后端shadowsocks-manyuser"><span class="nav-number">2.</span> <span class="nav-text">Shadowsocks多用户后端shadowsocks-manyuser</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#获取源码"><span class="nav-number">2.1.</span> <span class="nav-text">获取源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动服务"><span class="nav-number">2.2.</span> <span class="nav-text">启动服务</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结束"><span class="nav-number">3.</span> <span class="nav-text">结束</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#补充多节点的配置方式"><span class="nav-number">4.</span> <span class="nav-text">补充多节点的配置方式</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">AlphaBoom</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+  <script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+   <script type="text/javascript">
+        var gitalk = new Gitalk({
+          clientID: 'a6a9a35cef5cdbb6edde',
+          clientSecret: '3f2c90685ef385c63cb4bc8de7d8745a9d359091',
+          repo: 'alphaboom.github.io',
+          owner: 'alphaboom',
+          admin: ['alphaboom'],
+          id: md5(location.pathname),
+          distractionFreeMode: 'true'
+        })
+        gitalk.render('gitalk-container')           
+       </script>
+
+
+  
+  
+
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+  </script>
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+    });
+  </script>
+  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  
+
+  
+
+  
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/assets/shizuku.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config("");
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end --></body>
+</html>

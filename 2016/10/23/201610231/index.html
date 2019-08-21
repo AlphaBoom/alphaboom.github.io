@@ -1,0 +1,681 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Android 自定义控件,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2">
+
+
+
+
+
+
+<meta name="description" content="横向滑动RecyclerView一般都会要求类似Viewpager的效果就是要保证第一个item是全部展现的。我之前的处理方法就是添加滑动监听然后当滑动停止时计算显示的首个可见及完全可见的position然后再进行滑动达到这个效果。不过在实现时会发现滑动速度太快，这里有需要重写LinearSmoothScroller。然后还有一个重要的效果就是Fling时要保证滑动停止时直接是完全显示首个Ite">
+<meta name="keywords" content="Android 自定义控件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于Android24.2.0支持库SnapHelper的使用">
+<meta property="og:url" content="http://yoursite.com/2016/10/23/201610231/index.html">
+<meta property="og:site_name" content="AlphaBoom">
+<meta property="og:description" content="横向滑动RecyclerView一般都会要求类似Viewpager的效果就是要保证第一个item是全部展现的。我之前的处理方法就是添加滑动监听然后当滑动停止时计算显示的首个可见及完全可见的position然后再进行滑动达到这个效果。不过在实现时会发现滑动速度太快，这里有需要重写LinearSmoothScroller。然后还有一个重要的效果就是Fling时要保证滑动停止时直接是完全显示首个Ite">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1916010-93b854b43687cc0c.gif?imageMogr2/auto-orient/strip">
+<meta property="og:updated_time" content="2019-08-21T15:14:51.667Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="关于Android24.2.0支持库SnapHelper的使用">
+<meta name="twitter:description" content="横向滑动RecyclerView一般都会要求类似Viewpager的效果就是要保证第一个item是全部展现的。我之前的处理方法就是添加滑动监听然后当滑动停止时计算显示的首个可见及完全可见的position然后再进行滑动达到这个效果。不过在实现时会发现滑动速度太快，这里有需要重写LinearSmoothScroller。然后还有一个重要的效果就是Fling时要保证滑动停止时直接是完全显示首个Ite">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1916010-93b854b43687cc0c.gif?imageMogr2/auto-orient/strip">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/10/23/201610231/">
+
+
+  <title> 关于Android24.2.0支持库SnapHelper的使用 | AlphaBoom </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">AlphaBoom</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个世界需要更多英雄😁</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                关于Android24.2.0支持库SnapHelper的使用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-10-23T04:10:22+08:00" content="2016-10-23">
+              2016-10-23
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>横向滑动RecyclerView一般都会要求类似Viewpager的效果就是要保证第一个item是全部展现的。我之前的处理方法就是添加滑动监听然后当滑动停止时计算显示的首个可见及完全可见的position然后再进行滑动达到这个效果。不过在实现时会发现滑动速度太快，这里有需要重写LinearSmoothScroller。然后还有一个重要的效果就是Fling时要保证滑动停止时直接是完全显示首个Item，这里之前的方法是预测Fling的滑动距离然后找到最近的position之后再用LayoutManager的scrolltoposition()滑动过去。不过这样就没有fling的速度效果了。因为smoothscroll都是匀速的，现在recyclerView 24.2.0的支持库提供了SnapHelper现在我们可以完全模拟实现googleplay的效果了。</p>
+</blockquote>
+<a id="more"></a>
+<h1 id="SnapHelper"><a href="#SnapHelper" class="headerlink" title="SnapHelper"></a>SnapHelper</h1><p>SnapHelper 是一个抽象类，需要实现三个方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//当拖拽或滑动结束时会回调该方法，返回一个out = int[2]，out[0]x轴，out[1] y轴 ，这个值就是需要修正的你需要的位置的偏移量</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">int</span>[] calculateDistanceToFinalSnap(<span class="meta">@NonNull</span> LayoutManager layoutManager,        <span class="meta">@NonNull</span> View targetView);</span><br><span class="line"><span class="comment">//上面方法有一个targetView吧 就是这个方法返回的</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> View <span class="title">findSnapView</span><span class="params">(LayoutManager layoutManager)</span></span>;</span><br><span class="line"><span class="comment">//用于Fling，根据速度返回你要滑到的position</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">int</span> <span class="title">findTargetSnapPosition</span><span class="params">(LayoutManager layoutManager, <span class="keyword">int</span> velocityX,        <span class="keyword">int</span> velocityY)</span></span>;</span><br></pre></td></tr></table></figure></p>
+<p>看这三个方法接收就会发现已经可以实现GooglePlay上的效果了。下面以横向LinearLayoutManager以首项对齐为基础我们来简单实现下。</p>
+<h2 id="创建MySnapHelper-继承-LinearSnapHelper"><a href="#创建MySnapHelper-继承-LinearSnapHelper" class="headerlink" title="创建MySnapHelper 继承 LinearSnapHelper"></a>创建MySnapHelper 继承 LinearSnapHelper</h2><blockquote>
+<p>LinearSnapHelper 默认实现fling的相关操作，LinearSnapHelper 是居中对齐的，如果是这样的需求可以直接使用</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MySnapHelper</span> <span class="keyword">extends</span> <span class="title">LinearSnapHelper</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span>[] out = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] calculateDistanceToFinalSnap(<span class="meta">@NonNull</span> RecyclerView.LayoutManager layoutManager, <span class="meta">@NonNull</span> View targetView) &#123;</span><br><span class="line">        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) targetView.getLayoutParams();</span><br><span class="line">        <span class="keyword">int</span> width = layoutManager.getDecoratedMeasuredWidth(targetView) + params.leftMargin + params.rightMargin;</span><br><span class="line">        <span class="keyword">int</span> childLeft = layoutManager.getDecoratedLeft(targetView) - params.leftMargin;</span><br><span class="line">        <span class="keyword">int</span> parentPaddingLeft = layoutManager.getPaddingLeft();</span><br><span class="line">        <span class="keyword">if</span> (childLeft &gt;= parentPaddingLeft) &#123;</span><br><span class="line">            out[<span class="number">0</span>] = childLeft - parentPaddingLeft;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (parentPaddingLeft - childLeft &gt; width / <span class="number">2</span>) &#123;</span><br><span class="line">            out[<span class="number">0</span>] = childLeft + width-parentPaddingLeft;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            out[<span class="number">0</span>] = childLeft - parentPaddingLeft;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> out;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> View <span class="title">findSnapView</span><span class="params">(RecyclerView.LayoutManager layoutManager)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (layoutManager <span class="keyword">instanceof</span> LinearLayoutManager) &#123;</span><br><span class="line">            LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;</span><br><span class="line">            <span class="keyword">int</span> firstVizPosition = linearLayoutManager.findFirstVisibleItemPosition();</span><br><span class="line">            <span class="keyword">if</span> (firstVizPosition &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> layoutManager.findViewByPosition(firstVizPosition);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="写RecyclerView那些东西-略"><a href="#写RecyclerView那些东西-略" class="headerlink" title="写RecyclerView那些东西(略)"></a>写RecyclerView那些东西(略)</h2><h2 id="使用我们定义好的MySnapHelper"><a href="#使用我们定义好的MySnapHelper" class="headerlink" title="使用我们定义好的MySnapHelper"></a>使用我们定义好的MySnapHelper</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ActivityMainBinding binding = DataBindingUtil.setContentView(<span class="keyword">this</span>,R.layout.activity_main);</span><br><span class="line">binding.recycleView.setAdapter(<span class="keyword">new</span> MyMockAdapter());</span><br><span class="line">binding.recycleView.setLayoutManager(<span class="keyword">new</span> LinearLayoutManager(<span class="keyword">this</span>,LinearLayoutManager.HORIZONTAL,<span class="keyword">false</span>));</span><br><span class="line">MySnapHelper snapHelper = <span class="keyword">new</span> MySnapHelper();</span><br><span class="line">snapHelper.attachToRecyclerView(binding.recycleView);</span><br></pre></td></tr></table></figure>
+<h2 id="看下效果吧"><a href="#看下效果吧" class="headerlink" title="看下效果吧"></a>看下效果吧</h2><p><img src="http://upload-images.jianshu.io/upload_images/1916010-93b854b43687cc0c.gif?imageMogr2/auto-orient/strip" alt></p>
+<h1 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h1><blockquote>
+<p>最开始扯了一堆我之前实现的想法，那么肯定要分析下SnapHelper做了些什么吧</p>
+</blockquote>
+<ul>
+<li><p>添加Scroll及Fling的监听</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">mRecyclerView.addOnScrollListener(mScrollListener);</span><br><span class="line">mRecyclerView.setOnFlingListener(<span class="keyword">this</span>);</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> RecyclerView.OnScrollListener mScrollListener =</span><br><span class="line">            <span class="keyword">new</span> RecyclerView.OnScrollListener() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScrollStateChanged</span><span class="params">(RecyclerView recyclerView, <span class="keyword">int</span> newState)</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">super</span>.onScrollStateChanged(recyclerView, newState);</span><br><span class="line">                    <span class="keyword">if</span> (newState == RecyclerView.SCROLL_STATE_IDLE) &#123;</span><br><span class="line">                        snapToTargetExistingView();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onFling</span><span class="params">(<span class="keyword">int</span> velocityX, <span class="keyword">int</span> velocityY)</span> </span>&#123;</span><br><span class="line">        LayoutManager layoutManager = mRecyclerView.getLayoutManager();</span><br><span class="line">        <span class="keyword">if</span> (layoutManager == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        RecyclerView.Adapter adapter = mRecyclerView.getAdapter();</span><br><span class="line">        <span class="keyword">if</span> (adapter == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> minFlingVelocity = mRecyclerView.getMinFlingVelocity();</span><br><span class="line">        <span class="keyword">return</span> (Math.abs(velocityY) &gt; minFlingVelocity || Math.abs(velocityX) &gt; minFlingVelocity)</span><br><span class="line">                &amp;&amp; snapFromFling(layoutManager, velocityX, velocityY);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>snapToTargetExistingView，用了定义的两个抽象方法，然后执行滑动，这里的滑动用的是RecyclerView的scroller不是匀速的。</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">snapToTargetExistingView</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (mRecyclerView == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       LayoutManager layoutManager = mRecyclerView.getLayoutManager();</span><br><span class="line">       <span class="keyword">if</span> (layoutManager == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       View snapView = findSnapView(layoutManager);</span><br><span class="line">       <span class="keyword">if</span> (snapView == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">int</span>[] snapDistance = calculateDistanceToFinalSnap(layoutManager, snapView);</span><br><span class="line">       <span class="keyword">if</span> (snapDistance[<span class="number">0</span>] != <span class="number">0</span> || snapDistance[<span class="number">1</span>] != <span class="number">0</span>) &#123;</span><br><span class="line">           mRecyclerView.smoothScrollBy(snapDistance[<span class="number">0</span>], snapDistance[<span class="number">1</span>]);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>对于fling使用了匀速的scroller,这里放慢了滑动的速度，这里重写了onTargetFind，因为默认是保证View的可见性，这里进行了扩展</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Nullable</span></span><br><span class="line">   <span class="function"><span class="keyword">private</span> LinearSmoothScroller <span class="title">createSnapScroller</span><span class="params">(LayoutManager layoutManager)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (!(layoutManager <span class="keyword">instanceof</span> ScrollVectorProvider)) &#123;</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">new</span> LinearSmoothScroller(mRecyclerView.getContext()) &#123;</span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onTargetFound</span><span class="params">(View targetView, RecyclerView.State state, Action action)</span> </span>&#123;</span><br><span class="line">               <span class="keyword">int</span>[] snapDistances = calculateDistanceToFinalSnap(mRecyclerView.getLayoutManager(),</span><br><span class="line">                       targetView);</span><br><span class="line">               <span class="keyword">final</span> <span class="keyword">int</span> dx = snapDistances[<span class="number">0</span>];</span><br><span class="line">               <span class="keyword">final</span> <span class="keyword">int</span> dy = snapDistances[<span class="number">1</span>];</span><br><span class="line">               <span class="keyword">final</span> <span class="keyword">int</span> time = calculateTimeForDeceleration(Math.max(Math.abs(dx), Math.abs(dy)));</span><br><span class="line">               <span class="keyword">if</span> (time &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                   action.update(dx, dy, time, mDecelerateInterpolator);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line"></span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">protected</span> <span class="keyword">float</span> <span class="title">calculateSpeedPerPixel</span><span class="params">(DisplayMetrics displayMetrics)</span> </span>&#123;</span><br><span class="line">               <span class="keyword">return</span> MILLISECONDS_PER_INCH / displayMetrics.densityDpi;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>普通的滑动使用了正常的Scroller</li>
+<li>Fling使用了匀速的Scroller</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android-自定义控件/" rel="tag">#Android 自定义控件</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/23/20161023/" rel="next" title="仿QQ个人信息展示页气泡标签效果">
+                <i class="fa fa-chevron-left"></i> 仿QQ个人信息展示页气泡标签效果
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/10/记录Hexo的一些使用/" rel="prev" title="记录Hexo的一些使用">
+                记录Hexo的一些使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="gitalk-container"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.jpeg" alt="AlphaBoom">
+          <p class="site-author-name" itemprop="name">AlphaBoom</p>
+          <p class="site-description motion-element" itemprop="description">AlphaBoom的博客欢迎莅临</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/">
+              <span class="site-state-item-count">12</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/AlphaBoom" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="tencent://message/?uin=2439100920&Site=alphaboom.github.io&Menu=yes" target="_blank" title="QQ">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  QQ
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SnapHelper"><span class="nav-number">1.</span> <span class="nav-text">SnapHelper</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#创建MySnapHelper-继承-LinearSnapHelper"><span class="nav-number">1.1.</span> <span class="nav-text">创建MySnapHelper 继承 LinearSnapHelper</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#写RecyclerView那些东西-略"><span class="nav-number">1.2.</span> <span class="nav-text">写RecyclerView那些东西(略)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用我们定义好的MySnapHelper"><span class="nav-number">1.3.</span> <span class="nav-text">使用我们定义好的MySnapHelper</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#看下效果吧"><span class="nav-number">1.4.</span> <span class="nav-text">看下效果吧</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#原理分析"><span class="nav-number">2.</span> <span class="nav-text">原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">2.1.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">AlphaBoom</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+  <script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+   <script type="text/javascript">
+        var gitalk = new Gitalk({
+          clientID: 'a6a9a35cef5cdbb6edde',
+          clientSecret: '3f2c90685ef385c63cb4bc8de7d8745a9d359091',
+          repo: 'alphaboom.github.io',
+          owner: 'alphaboom',
+          admin: ['alphaboom'],
+          id: md5(location.pathname),
+          distractionFreeMode: 'true'
+        })
+        gitalk.render('gitalk-container')           
+       </script>
+
+
+  
+  
+
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+  </script>
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+    });
+  </script>
+  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  
+
+  
+
+  
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/assets/shizuku.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config("");
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end --></body>
+</html>

@@ -1,0 +1,916 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="pinyin,ime,分析,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2">
+
+
+
+
+
+
+<meta name="description" content="前言 最后看完其实还是蛮简单的，看代码看了半天都搞乱了，可以简单看下总结部分  本文主要对GooglePinyin Android输入法C++层的代码进行分析。目的是为了了解输入法引擎的基础数据结构及工作流程。在研究之前先简单分析一下，对于一个基础拼音输入法，需要掌握的功能都有哪些： 基础功能：  将一个长的拼音字符串切分为多个独立的拼音 根据拼音展示可能的词语，并根据可能性从高按低排序展示 支持">
+<meta name="keywords" content="pinyin,ime,分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GooglePinyin分析">
+<meta property="og:url" content="http://yoursite.com/2018/01/21/GooglePinyin分析/index.html">
+<meta property="og:site_name" content="AlphaBoom">
+<meta property="og:description" content="前言 最后看完其实还是蛮简单的，看代码看了半天都搞乱了，可以简单看下总结部分  本文主要对GooglePinyin Android输入法C++层的代码进行分析。目的是为了了解输入法引擎的基础数据结构及工作流程。在研究之前先简单分析一下，对于一个基础拼音输入法，需要掌握的功能都有哪些： 基础功能：  将一个长的拼音字符串切分为多个独立的拼音 根据拼音展示可能的词语，并根据可能性从高按低排序展示 支持">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/01/21/GooglePinyin分析/a.png">
+<meta property="og:image" content="http://yoursite.com/2018/01/21/GooglePinyin分析/f.png">
+<meta property="og:image" content="http://yoursite.com/2018/01/21/GooglePinyin分析/c.png">
+<meta property="og:image" content="http://yoursite.com/2018/01/21/GooglePinyin分析/e.png">
+<meta property="og:image" content="http://yoursite.com/2018/01/21/GooglePinyin分析/b.png">
+<meta property="og:image" content="http://yoursite.com/2018/01/21/GooglePinyin分析/d.png">
+<meta property="og:updated_time" content="2019-08-21T15:14:51.668Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="GooglePinyin分析">
+<meta name="twitter:description" content="前言 最后看完其实还是蛮简单的，看代码看了半天都搞乱了，可以简单看下总结部分  本文主要对GooglePinyin Android输入法C++层的代码进行分析。目的是为了了解输入法引擎的基础数据结构及工作流程。在研究之前先简单分析一下，对于一个基础拼音输入法，需要掌握的功能都有哪些： 基础功能：  将一个长的拼音字符串切分为多个独立的拼音 根据拼音展示可能的词语，并根据可能性从高按低排序展示 支持">
+<meta name="twitter:image" content="http://yoursite.com/2018/01/21/GooglePinyin分析/a.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/01/21/GooglePinyin分析/">
+
+
+  <title> GooglePinyin分析 | AlphaBoom </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">AlphaBoom</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个世界需要更多英雄😁</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                GooglePinyin分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2018-01-21T21:20:07+08:00" content="2018-01-21">
+              2018-01-21
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
+<p>最后看完其实还是蛮简单的，看代码看了半天都搞乱了，可以简单看下<a href="#conclusion">总结</a>部分</p>
+</blockquote>
+<p>本文主要对GooglePinyin Android输入法C++层的代码进行分析。目的是为了了解输入法引擎的基础数据结构及工作流程。<br>在研究之前先简单分析一下，对于一个基础拼音输入法，需要掌握的功能都有哪些：</p>
+<p><strong>基础功能：</strong></p>
+<ol>
+<li>将一个长的拼音字符串切分为多个独立的拼音</li>
+<li>根据拼音展示可能的词语，并根据可能性从高按低排序展示</li>
+<li>支持组合模式输入即一次或多次输入，多次选择候选词，一次输出</li>
+<li>基础性能优化（例如增量查询，退格是常用的功能，所以增量查询是一个基础功能）</li>
+</ol>
+<p><strong>进阶功能：</strong></p>
+<ol>
+<li>支持简拼（首字母模式）</li>
+<li>支持词语联想，例如在组合模式下，如果选定部分词语，则针对词语给出跟高优先级的候选词，增强词语联想功能</li>
+<li>支持用户特征词库，对用户输入过的词语进行记录。用户常用词有更高的优先级展示</li>
+</ol>
+<p><strong>高级功能：</strong></p>
+<ol>
+<li>拼音纠错，对可能误输入的拼音展示可能正确的拼音输入结果</li>
+<li>语音输入</li>
+<li><p>手写输入</p>
+<a id="more"></a>
+<h2 id="词库原始数据"><a href="#词库原始数据" class="headerlink" title="词库原始数据"></a>词库原始数据</h2><p>词库的原始数据形式如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">鼥 0.750684002197 1 ba</span><br><span class="line">釛 0.781224156844 1 ba</span><br><span class="line">軷 0.9691786136 1 ba</span><br><span class="line">釟 0.9691786136 1 ba</span><br><span class="line">蚆 1.15534975655 1 ba</span><br><span class="line">...</span><br><span class="line">斑斑 494.9767145 0 ban ban</span><br><span class="line">版本 15935.9132976 0 ban ben</span><br><span class="line">半杯 105.953760973 0 ban bei</span><br><span class="line">半边 236.991986692 0 ban bian</span><br><span class="line">斑驳 188.196293023 0 ban bo</span><br><span class="line">...</span><br><span class="line">请注意 887.99205879 0 qing zhu yi</span><br><span class="line">青春痘 343.139741671 0 qing chun dou</span><br><span class="line">青春期 536.070335228 0 qing chun qi</span><br><span class="line">青城山 121.066816454 0 qing cheng shan</span><br><span class="line">青少年 2406.4213017 0 qing shao nian</span><br><span class="line">请稍候 125.36572391 0 qing shao hou</span><br><span class="line">请使用 166.768626413 0 qing shi yong</span><br><span class="line">...</span><br><span class="line">二次开发 126.306596357 0 er ci kai fa</span><br><span class="line">二氧化碳 532.740555233 0 er yang hua tan</span><br><span class="line">二氧化硫 196.831399718 0 er yang hua liu</span><br><span class="line">欧美国家 141.29744947 0 ou mei guo jia</span><br><span class="line">欧洲国家 193.90988203 0 ou zhou guo jia</span><br><span class="line">欧洲市场 170.551683166 0 ou zhou shi chang</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第一列是具体词语的汉字</p>
+</li>
+<li>第二列是该词语的词频</li>
+<li>第三列是GBK mark，如果标记为1，会被舍弃（这个只在没有可用汉字表的情况下使用，默认情况是会有这个可用汉字表的，所以默认情况下这个值没有使用）</li>
+<li>之后的部分为词语的拼音</li>
+</ol>
+<p>可用汉字的原始数据如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">〇一丁七万丈三上下丌不与丏丐丑专且丕世丗丘丙业丛东丝丞丟両丢两严並丧丨个丫丬中丮丰丱串丳临丶丸丹为主丼丽举丿乂乃久乇么义之乌乍乎乏乐乒乓乔乕乖乗乘乙乜九乞也习乡乢书乩买乱乳乷乾乿亀亂亃亄亅了予争亊事二亍于亏亐云互亓五井亘亙亚些亜亞亟亠亡亢交亥亦产亨亩享京亭亮亰亲亳亵亶亹人亻....鸲鸳鸵鸶鸷鸸鸹鸺鸽鸾鸿鹁鹂鹃鹄鹅鹆鹇鹈鹉鹊鹋鹌鹎鹏鹑鹕鹗鹘鹚鹛鹜鹞鹣鹤鹦鹧鹨鹩鹪鹫鹬鹭鹰鹱鹳鹵鹸鹹鹺鹼鹽鹾鹿麀麁麂麃麆麇麈麉麊麋麌麍麎麑麒麓麔麕麗麙麚麛麜麝麟麠麡麤麥麦麧麩麪麭麮麰麴麵麶麷麸麹麺麻麼麽麾麿黀黂黃黄黈黉黌黍黎黏黐黑黒黓黔黕黖默黙黚黛黜黝點黟黠黢黤黥黦黧黨黩黪黫黭黮黯黰黲黳黴黵黶黷黹黺黻黼黽黾黿鼀鼁鼆鼇鼈鼉鼊鼋鼍鼎鼏鼐鼒鼓鼕鼖鼗鼘鼙鼚鼛鼜鼞鼠鼡鼢鼣鼤鼥鼨鼩鼪鼫鼬鼭鼮鼯鼰鼱鼲鼳鼴鼵鼶鼷鼸鼹鼻鼽鼾齀齁齂齃齄齆齇齈齉齊齋齌齍齎齏齐齑齒齔齕齖齗齘齙齛齜齝齞齟齠齡齢齣齤齥齦齧齪齫齬齮齯齰齱齲齴齵齶齷齸齹齺齻齾齿龀龃龄龅龆龇龈龉龊龋龌龍龐龑龒龔龕龘龙龚龛龜龝龟龠龢龤龥</span><br></pre></td></tr></table></figure></p>
+<h2 id="构建词库"><a href="#构建词库" class="headerlink" title="构建词库"></a>构建词库</h2><blockquote>
+<p>构建词库请参考 <a href="http://palanceli.com/2017/04/16/2017/0416libGooglePinyin01/" target="_blank" rel="noopener">这篇文章</a><br>略</p>
+</blockquote>
+<h2 id="基础数据结构分析"><a href="#基础数据结构分析" class="headerlink" title="基础数据结构分析"></a>基础数据结构分析</h2><p>简单分析输入法中各个单元数据块的数据构造形式和代表的意义</p>
+<h3 id="LemmaId-作为词语的身份标识"><a href="#LemmaId-作为词语的身份标识" class="headerlink" title="LemmaId 作为词语的身份标识"></a>LemmaId 作为词语的身份标识</h3><p>构建词库时会将所有的词语按照词语长度的顺序拼接为一个长的字符串，并生成start_pos及start_id（见<a href="#F1">图1</a>），当需要汉字资源时可以根据这两个字段到这个长字符串中获取。<br><a herf="#F1"><img src="/2018/01/21/GooglePinyin分析/a.png" alt="图1"></a><br><strong> 1. 已知词语的情况下获取对应LemmaId</strong><br>对于N长度的词语，首先通过start_pos[N-1]及start_pos[N]获取词语所在区间，之后通过二分查询获取词语所在的具体位置。之后再根据start_id[N-1]可计算得到具体的LemmaId<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">LemmaIdType DictList::get_lemma_id(<span class="keyword">const</span> char16 *str, uint16 str_len) &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="literal">NULL</span> == str || str_len &gt; kMaxLemmaSize)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  char16 *found = find_pos_startedbyhzs(str, str_len, cmp_func_[str_len - <span class="number">1</span>]);</span><br><span class="line">  <span class="keyword">if</span> (<span class="literal">NULL</span> == found)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  assert(found &gt; buf_);</span><br><span class="line">  assert(<span class="keyword">static_cast</span>&lt;<span class="keyword">size_t</span>&gt;(found - buf_) &gt;= start_pos_[str_len - <span class="number">1</span>]);</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;LemmaIdType&gt;</span><br><span class="line">      (start_id_[str_len - <span class="number">1</span>] +</span><br><span class="line">       (found - buf_ - start_pos_[str_len - <span class="number">1</span>]) / str_len);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong> 2. 通过LemmaId获取对应的词语 </strong><br>首先通过start_id[]判断LemmaId所在的区间，进而可以得到对应的词语为N字词语。然后通过start_pos[N]获取N字词的起始偏移位置，由于已知词语的序号（LemmaId）,通过序号及词语长度N，则可以计算出具体的偏移位置<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">uint16 DictList::get_lemma_str(LemmaIdType id_lemma, char16 *str_buf,</span><br><span class="line">                               uint16 str_max) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!initialized_ || id_lemma &gt;= start_id_[kMaxLemmaSize] || <span class="literal">NULL</span> == str_buf</span><br><span class="line">      || str_max &lt;= <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Find the range</span></span><br><span class="line">  <span class="keyword">for</span> (uint16 i = <span class="number">0</span>; i &lt; kMaxLemmaSize; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (i + <span class="number">1</span> &gt; str_max - <span class="number">1</span>)</span><br><span class="line">      <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (start_id_[i] &lt;= id_lemma &amp;&amp; start_id_[i + <span class="number">1</span>] &gt; id_lemma) &#123;</span><br><span class="line">      <span class="keyword">size_t</span> id_span = id_lemma - start_id_[i];</span><br><span class="line"></span><br><span class="line">      uint16 *buf = buf_ + start_pos_[i] + id_span * (i + <span class="number">1</span>);</span><br><span class="line">      <span class="keyword">for</span> (uint16 len = <span class="number">0</span>; len &lt;= i; len++) &#123;</span><br><span class="line">        str_buf[len] = buf[len];</span><br><span class="line">      &#125;</span><br><span class="line">      str_buf[i+<span class="number">1</span>] = (char16)<span class="string">'\0'</span>;</span><br><span class="line">      <span class="keyword">return</span> i + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="spl-id-作为拼音的标志"><a href="#spl-id-作为拼音的标志" class="headerlink" title="spl_id 作为拼音的标志"></a>spl_id 作为拼音的标志</h3><p>和LemmaId通过spl_id表示拼音。</p>
+<ol>
+<li>通过拼音字符串获取spl_id<a href="#s2">[2]</a></li>
+</ol>
+<p><span id="t1"></span></p>
+<h3 id="SpellingTrie"><a href="#SpellingTrie" class="headerlink" title="SpellingTrie"></a>SpellingTrie</h3><blockquote>
+<p>建议参考构建词库，</p>
+</blockquote>
+<p>将所有汉语拼音构建Trie，方便对拼音字符串进行查询。节点为SpellingNode(见<a href="#F2">图2</a>)<br><a herf="#F2"><img src="/2018/01/21/GooglePinyin分析/f.png" alt="图2"></a></p>
+<ul>
+<li>first_son 指向第一个child的节点</li>
+<li>spelling_idx 对所有的汉语拼音做编号排序’A’的idx为1，小于30为half音节（可以作为拼音首的音节），大于30的为full音节，30也是’A’，’A’既是half也是full的音</li>
+<li>num_of_son 子节点数量</li>
+<li>char_this_node 该节点对应的拼音字符</li>
+<li>score 该节点的分数（具体功能待补充）</li>
+</ul>
+<h4 id="关于拼音"><a href="#关于拼音" class="headerlink" title="关于拼音"></a>关于拼音</h4><blockquote>
+<p>来自百度百科</p>
+</blockquote>
+<p>需要简单了解下拼音的构成</p>
+<ul>
+<li>声母（21个），是使用在韵母前面的辅音，跟韵母一齐构成的一个完整的音节<br>①塞音：b p d t ɡ k(6个)<br>②塞擦音：z c zh ch j q(6个)<br>③擦音：f h s sh r x(6个)<br>④鼻音：m n(2个)<br>⑤边音：l(1个)</li>
+<li>韵母=韵头（介音）+韵腹（元音，韵母中最关键的部分）+韵尾（可元音可辅音,其中的辅音专指鼻韵母）<br>例子：’guan’官,’g’为声母,’uan’为韵母，’uan’中’u’韵头’a’韵腹’n’韵尾</li>
+<li>韵头 又称介音，是韵腹前面、起前导作用的部分，发音比较模糊，往往迅速带过</li>
+<li>韵腹 又称主要元音，是一个韵母发音的关键，是韵母发音过程时，口腔肌肉最紧张，发音最响亮的部分</li>
+<li>韵尾 可元音可辅音。一种叫鼻韵尾，有’n’，’ng’两个。另一种叫口韵尾。韵尾是韵腹后面、起收尾作用的部分，发音也比较模糊，但务求发到位。</li>
+<li>韵母共三十九个可以分为单韵母、复韵母、鼻韵母</li>
+<li>单韵母<br>普通话中单元音韵母共有十个：a、o、e、 ê、i、u、ü、-i（前）、-i（后）、er。</li>
+<li>复韵母<br>普通话共有十三个复韵母：ai、ei、ao、ou、ia、ie、ua、uo、 üe、iao 、iou、uai、uei。</li>
+<li>鼻韵母<br>共有十六个：an、ian、uan、 üan 、en、in、uen、 ün 、ang、iang、uang、eng、ing、ueng、ong、iong。</li>
+</ul>
+<h4 id="输入法中对声母韵母的区分"><a href="#输入法中对声母韵母的区分" class="headerlink" title="输入法中对声母韵母的区分"></a>输入法中对声母韵母的区分</h4><p>使用如下记录进行判断：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Bit 0 : is it a Shengmu char?</span></span><br><span class="line"><span class="comment">// Bit 1 : is it a Yunmu char? (one char is a Yunmu)</span></span><br><span class="line"><span class="comment">// Bit 2 : is it enabled in ShouZiMu(first char) mode?</span></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">char</span> SpellingTrie::char_flags_[] = &#123;</span><br><span class="line">  <span class="comment">// a    b      c     d     e     f     g</span></span><br><span class="line">  <span class="number">0x02</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x02</span>, <span class="number">0x01</span>, <span class="number">0x01</span>,</span><br><span class="line">  <span class="comment">// h    i     j      k     l     m    n</span></span><br><span class="line">  <span class="number">0x01</span>, <span class="number">0x00</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x01</span>,</span><br><span class="line">  <span class="comment">// o    p     q      r     s     t</span></span><br><span class="line">  <span class="number">0x02</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x01</span>,</span><br><span class="line">  <span class="comment">// u    v     w      x     y     z</span></span><br><span class="line">  <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x01</span>, <span class="number">0x01</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>对应的掩码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">static const uint16 kHalfIdShengmuMask = 0x01;</span><br><span class="line">static const uint16 kHalfIdYunmuMask = 0x02;</span><br><span class="line">static const uint16 kHalfIdSzmMask = 0x04;</span><br><span class="line">//使用掩码可以得到输入法记录的声母及韵母</span><br><span class="line">//声母： b c d f g h j k l m n p q r s t w x y z</span><br><span class="line">//声母可以准确的区分出来</span><br><span class="line">//匹配韵母发现i u v 三个没匹配到的，看起来因为i u v 不能做首字母所以就没做出区分</span><br><span class="line">//关于kHalfIdSzmMask，这个是开启首字母匹配模式（简拼）时会对所有声母添加该掩码，对所有韵母添加该掩码（i u v 不算做韵母）</span><br><span class="line">//看起来对韵母不做太仔细的区分（即忽略了i u v 的韵母属性），后面的分析中关注该问题</span><br></pre></td></tr></table></figure></p>
+<p>half音的记录(下面就1-29的half音了，0是不使用的)<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// z/c/s is for Zh/Ch/Sh</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">char</span> SpellingTrie::kHalfId2Sc_[kFullSplIdStart + <span class="number">1</span>] =</span><br><span class="line">    <span class="string">"0ABCcDEFGHIJKLMNOPQRSsTUVWXYZz"</span>;</span><br></pre></td></tr></table></figure></p>
+<h3 id="LmaNodeLE0，LmaNodeGE1"><a href="#LmaNodeLE0，LmaNodeGE1" class="headerlink" title="LmaNodeLE0，LmaNodeGE1"></a>LmaNodeLE0，LmaNodeGE1</h3><blockquote>
+<p>将所有词语构建Trie树，单个拼音作为Key</p>
+</blockquote>
+<p>LmaNodeLE0 存储根节点及第一层级的子节点，LmaNodeGE1 存储其他的节点。（见<a href="#F3">图3</a>）<br><a herf="F3"><img src="/2018/01/21/GooglePinyin分析/c.png" alt="图3"></a></p>
+<h4 id="LmaNodeLE0"><a href="#LmaNodeLE0" class="headerlink" title="LmaNodeLE0"></a>LmaNodeLE0</h4><blockquote>
+<p>LE = less and equal 即root和level0层的节点</p>
+</blockquote>
+<ul>
+<li>spl_idx 节点对应的拼音id</li>
+<li>son_1st_off 第一个子节点在GE1表中的偏移位置</li>
+<li>num_of_son 子节点数量</li>
+<li>homo_idx_buf_off 该读音第一个词在homo_idx_buf下的偏移位置</li>
+<li>num_of_homo 该读音的词语数量<br>homo_idx_buf 是将所有的词语按照拼音顺序排序，作用就是通过这个结构获取对应的汉字。先通过homo_idx_buf_off找到该读音下第一个单词的LemmaId,通过LemmaId就可以拿到具体词语。</li>
+</ul>
+<h4 id="LmaNodeGE1"><a href="#LmaNodeGE1" class="headerlink" title="LmaNodeGE1"></a>LmaNodeGE1</h4><blockquote>
+<p>GE = greate and equal 即大于等于level1层的节点</p>
+</blockquote>
+<p>结构和LmaNodeLE0是一致的不过在两个标志偏移位置的值，被拆分成低位及高位两部分。这里应该是因为uint16不够标记所有的词语节点</p>
+<ul>
+<li>son_1st_off 第一个子节点在GE1表中的偏移位置</li>
+<li>son_1st_off_l  son_1st_off的低位部分</li>
+<li>son_1st_off_h  son_1st_off的高位部分</li>
+<li>homo_idx_buf_off_l homo_idx_buff_off的低位部分</li>
+<li>homo_idx_buff_off_h homo_idx_buff_off的高位部分</li>
+</ul>
+<h4 id="LmaNode"><a href="#LmaNode" class="headerlink" title="LmaNode"></a>LmaNode</h4><p>总结LmaNodeLE0和LmaNodeGE1,可以看出一个LmaNode这样一个节点所包含的信息</p>
+<ul>
+<li>该节点对应的拼音，通过spl_idx得到</li>
+<li>该节点的子节点，通过son_1st_off及num_of_son得到</li>
+<li>该节点对应的词语， 通过homo_idx_bu及num_of_homo得到</li>
+</ul>
+<h3 id="获取词频（NGram）"><a href="#获取词频（NGram）" class="headerlink" title="获取词频（NGram）"></a>获取词频（NGram）</h3><blockquote>
+<p>词频限制<a href="#s3">[3]</a></p>
+</blockquote>
+<p>获取词频方式是通过LemmaId，直接获取。</p>
+<ul>
+<li>freq_codes_ 存储所有词频分数的数组</li>
+<li>lma<em>freq_idx</em> 将LemmaId映射为freq<em>codes的位置<br>所以通过freq_codes</em>[lma<em>freq_idx</em>[lma_id]]就可以获取到词库中的词频了</li>
+</ul>
+<h3 id="通过拼音查询结果"><a href="#通过拼音查询结果" class="headerlink" title="通过拼音查询结果"></a>通过拼音查询结果</h3><p>MatrixRow、MatrixNode、DictMatchInfo三个都是通过拼音查询汉字词语的数据结构。每输入一个拼音字符都会生成一个MatrixRow对应当前状态的查询结果，而一个MatrixRow由最多5个MatrixNode和若干个DictMatchInfo组成。其中MatrixNode携带具体的分数及LemmaId可以获得具体的词语。而DictMatchInfo对应的词语构成的Trie树，它所包含的信息有当前节点指向的拼音，在Trie树中的层级，和来自那个DictMatchInfo,相当于Trie树中父节点的信息(见<a href="#F4">[图4]</a>)<br><a herf="F4"><img src="/2018/01/21/GooglePinyin分析/e.png" alt="图4"></a></p>
+<h4 id="MatrixRow"><a href="#MatrixRow" class="headerlink" title="MatrixRow"></a>MatrixRow</h4><ul>
+<li>mtrx_nd_pos 用于获取MatrixNode</li>
+<li>mtrx_nd_num 结果数量(包含的MatrixNode数量)</li>
+<li>dmi_pos 用于获取DictMatchInfo</li>
+<li>dmi_num 包含的DictMatchInfo数量</li>
+<li>dmi_has_full_id 标识当前是否为完整的拼音，这里注释内容很详细看下注释：</li>
+</ul>
+<p>Used to indicate whether there are dmi nodes in this step with full<br>spelling id. This information is used to decide whether a substring of a valid Pinyin should be extended.</p>
+<p>Example1: shoudao<br>When the last char ‘o’ is added, the parser will find “dao” is a valid<br>Pinyin, and because all dmi nodes at location ‘d’ (including those for<br>“shoud”, and those for “d”) have Shengmu id only, so it is not necessary<br>to extend “ao”, otherwise the result may be “shoud ao”, that is not<br>reasonable.</p>
+<p>Example2: hengao<br>When the last ‘o’ is added, the parser finds “gao” is a valid Pinyin.<br>Because some dmi nodes at ‘g’ has Shengmu ids (hen’g and g), but some dmi<br>nodes at ‘g’ has full ids (‘heng’), so it is necessary to extend “ao”, thus<br>“heng ao” can also be the result.</p>
+<p>Similarly, “ganga” is expanded to “gang a”.</p>
+<p>For Pinyin string “xian”, because “xian” is a valid Pinyin, because all dmi<br>nodes at ‘x’ only have Shengmu ids, the parser will not try “x ian” (and it<br>is not valid either). If the parser uses break in the loop, the result<br>always be “xian”; but if the parser uses continue in the loop, “xi an” will<br>also be tried. This behaviour can be set via the function<br>set_xi_an_switch().</p>
+<ul>
+<li>mtrx_nd_fixed 当前被用户选择的节点（候选栏被用户选择的那个节点）</li>
+</ul>
+<h4 id="MatixNode"><a href="#MatixNode" class="headerlink" title="MatixNode"></a>MatixNode</h4><ul>
+<li>id 对应词语</li>
+<li>score 节点的分数</li>
+<li>from 前一个节点</li>
+<li>dmi_fr 用户与获取对应的DictMatchInfo</li>
+<li>step 对应第几个步骤相当于第几行的MatrixRow</li>
+</ul>
+<h4 id="DictMatchInfo"><a href="#DictMatchInfo" class="headerlink" title="DictMatchInfo"></a>DictMatchInfo</h4><ul>
+<li>handles 用于获取标记，当在字典中查询时会对做好的查询做标记，便于之后的查询</li>
+<li>dmi_fr 来自哪个DMI节点 如果为-1意味这个为根节点</li>
+<li>spl_id 对应的拼音id</li>
+<li>dict_level 对应字典的层级</li>
+<li>c_phrase 1 代表为组合短语</li>
+<li>splid_end_split 是否通过分割字符进行解析</li>
+<li>splstr_len  整个词语的拼音长度</li>
+<li>all_full_id 词语中所有汉字对应的拼音都是完整的拼音</li>
+</ul>
+<h2 id="通过输入法的使用流程对输入法进行分析"><a href="#通过输入法的使用流程对输入法进行分析" class="headerlink" title="通过输入法的使用流程对输入法进行分析"></a>通过输入法的使用流程对输入法进行分析</h2><p>如果从使用的角度来分析输入法引擎具体做了什么，那么简单的来说使用输入法可以分为下面的步骤：</p>
+<ol>
+<li>输入拼音，展示候选词</li>
+<li>选择候选词语。候选词是否包含所有输入的拼音 ? 执行3 ： 继续执行2</li>
+<li>将选择的输出，提交到窗口聚焦视图进行处理<br>注：执行2的过程中也可以执行1</li>
+</ol>
+<h3 id="输入拼音"><a href="#输入拼音" class="headerlink" title="输入拼音"></a>输入拼音</h3><p>当输入拼音之后会在java层调用<em>imSearch(pystr：String,pystr_len:int)</em>方法获取候选结果,具体调用方法为：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">size_t</span> MatrixSearch::search(<span class="keyword">const</span> <span class="keyword">char</span> *py, <span class="keyword">size_t</span> py_len)&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>首先校验字符串是否与之前的搜索字符串有相同前缀，保留相同字符串的校验结果（校验结果保存在MatrixRow[]中），然后将无用的旧搜索结果恢复初始化。<br>之后开始执行添加拼音及获取候选数据的逻辑，代码如下：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="string">'\0'</span> != pys_[ch_pos]) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!add_char(py[ch_pos])) &#123;</span><br><span class="line">    pys_decoded_len_ = ch_pos;</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ch_pos++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Get spelling ids and starting positions.</span></span><br><span class="line">get_spl_start_id();</span><br><span class="line"></span><br><span class="line"><span class="comment">// If there are too many spellings, remove the last letter until the spelling</span></span><br><span class="line"><span class="comment">// number is acceptable.</span></span><br><span class="line"><span class="keyword">while</span> (spl_id_num_ &gt; <span class="number">9</span>) &#123;</span><br><span class="line">  py_len--;</span><br><span class="line">  reset_search(py_len, <span class="literal">false</span>, <span class="literal">false</span>, <span class="literal">false</span>);</span><br><span class="line">  pys_[py_len] = <span class="string">'\0'</span>;</span><br><span class="line">  get_spl_start_id();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">prepare_candidates();</span><br></pre></td></tr></table></figure></p>
+<p>这里有三个要详细分析的方法分别为:<em>add_char</em>、<em>get_spl_start_id</em>、<em>prepare_candidates</em></p>
+<h4 id="MatrixSearch-add-char-char-ch"><a href="#MatrixSearch-add-char-char-ch" class="headerlink" title="MatrixSearch::add_char(char ch)"></a>MatrixSearch::add_char(char ch)</h4><blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> MatrixSearch::add_char(<span class="keyword">char</span> ch) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!prepare_add_char(ch))</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">return</span> add_char_qwerty();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p><strong>prepare_add_char</strong></p>
+<ol>
+<li>判断是否可以进行解析</li>
+<li>将字符串添加到待解析的数组中</li>
+<li>初始化对应的MatrixRow 用于之后的操作</li>
+</ol>
+<p><strong>add_char_qwerty</strong><a href="#s1">[1]</a><br>生成具体的MatrixRow信息，包含MatrixNode和DictMatchInfo两个组成部分。</p>
+<h4 id="MatrixSearch-get-spl-start-id"><a href="#MatrixSearch-get-spl-start-id" class="headerlink" title="MatrixSearch::get_spl_start_id()"></a>MatrixSearch::get_spl_start_id()</h4><p>根据最新生成的MatrixRow，对它的每个MatrixNode都生成一个拼音和词语对应关系的结构。<br><img src="/2018/01/21/GooglePinyin分析/b.png" alt="图5"></p>
+<h4 id="MatrixSearch-prepare-candidates"><a href="#MatrixSearch-prepare-candidates" class="headerlink" title="MatrixSearch::prepare_candidates()"></a>MatrixSearch::prepare_candidates()</h4><ol>
+<li>首先通过<strong>get_candidate0</strong>获取当前最优匹配</li>
+<li>然后遍历拼音串通过<strong>get_lpis</strong>获取候选词,匹配所有拼音前缀可获取的候选词<br>例如：“wo hen hao”，首先匹配”wo hen hao”如果有匹配项纪录匹配项数量为lpi_num_full_match,不管有没有匹配继续对“wo hen”查询对应候选词语，之后再对“wo”查询对应的候选词语，然后结束查询</li>
+<li>对不是全匹配的项进行排序，全匹配内容本身也已经排过序了再<strong>get_lpis</strong>的过程中</li>
+</ol>
+<p>到此向输入法输入一个字符的操作结束</p>
+<h3 id="展示候选词"><a href="#展示候选词" class="headerlink" title="展示候选词"></a>展示候选词</h3><p>经过输入拼音字符的过程，我们已经通过词库查询到了需要展示的候选词，应用层会将候选数据更新到DecINfo。<br>这里会分为两种方式进行获取候选词，一种直接通过MatrixSearch::get_candidate的方式，另一种通过MatrixSearch::getPredictItem。</p>
+<h4 id="MatrixSearch-get-candidate"><a href="#MatrixSearch-get-candidate" class="headerlink" title="MatrixSearch::get_candidate"></a>MatrixSearch::get_candidate</h4><p>对于非组合词使用这种方式获取候选词，需要注意的一点是第一个候选词是通过MatrixNode组合出来的词（这个词可能不属于词库），从第二个开始为词库中获取到的候选词</p>
+<h4 id="MatrixSearch-getPredictItem"><a href="#MatrixSearch-getPredictItem" class="headerlink" title="MatrixSearch::getPredictItem"></a>MatrixSearch::getPredictItem</h4><p>根据词语获取预测词</p>
+<h3 id="选择候选词"><a href="#选择候选词" class="headerlink" title="选择候选词"></a>选择候选词</h3><h2 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h2><p><div id="s1"></div></p>
+<h3 id="add-char-qwerty匹配规则部分"><a href="#add-char-qwerty匹配规则部分" class="headerlink" title="add_char_qwerty匹配规则部分"></a>add_char_qwerty匹配规则部分</h3><p>每向拼音字符串中添加一个字符都会新生成一个MatrixRow，下面来分析下这个过程都做了什么。首先，由于拼音最长占用6个字符，所以新加入一个字符之后，我们需要遍历最后6个字符（包括我们新加入的字符）来处理所有可能的变化:</p>
+<h4 id="外层for循环"><a href="#外层for循环" class="headerlink" title="外层for循环"></a>外层for循环</h4><blockquote>
+<p>例如：<br>当前已有拼音“wohenha”，然后加入一个“o”。那么为了生成新的结果MatrixRow,就需要考虑“wo henhao”,”woh enhao”，“wohe nhao”,”wohen hao”,”wohenh ao”,”wohenha o”,这些情况，很明显一些结果是不符合的，可以直接跳过，不需要去获取候选词</p>
+<p>ext<em>len : 循环的变量<br>oldRow(拼音长度 - ext_len): 不受到扩展影响的候选结果<br>spl_start\</em>[fixed<em>hzs</em>]:表示拼音字符串中已经被用户确认的部分（代表这部分拼音已经被用户认可，不需要去改动这部分内容）</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (uint16 ext_len = kMaxPinyinSize + <span class="number">1</span>; ext_len &gt; <span class="number">0</span>; ext_len--) &#123;</span><br><span class="line">    <span class="keyword">if</span> (ext_len &gt; pys_decoded_len_ - spl_start_[fixed_hzs_])</span><br><span class="line">      <span class="keyword">continue</span>;</span><br><span class="line">    <span class="keyword">if</span> (ext_len &gt; <span class="number">1</span> &amp;&amp; <span class="number">0</span> != longest_ext &amp;&amp;</span><br><span class="line">        <span class="number">0</span> == matrix_[pys_decoded_len_ - ext_len].dmi_has_full_id) &#123;</span><br><span class="line">      <span class="keyword">if</span> (xi_an_enabled_)</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    uint16 oldrow = pys_decoded_len_ - ext_len;</span><br><span class="line">    <span class="keyword">if</span> (spl_start_[fixed_hzs_] &gt; oldrow)</span><br><span class="line">      <span class="keyword">continue</span>;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0</span> == matrix_[oldrow].mtrx_nd_num &amp;&amp; !dmi_c_phrase_)</span><br><span class="line">      <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    spl_idx = spl_parser_-&gt;get_splid_by_str(pys_ + oldrow,</span><br><span class="line">                                            ext_len, &amp;is_pre);</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0</span> == spl_idx)</span><br><span class="line">      <span class="keyword">continue</span>;</span><br><span class="line">    <span class="comment">// Extend the DMI nodes of that old row</span></span><br><span class="line">    <span class="comment">// + 1 is to extend an extra node from the root</span></span><br><span class="line">    <span class="keyword">bool</span> splid_end_split = is_split_at(oldrow + ext_len);</span><br><span class="line">    <span class="keyword">for</span>(...)</span><br><span class="line">      ...</span><br></pre></td></tr></table></figure>
+<ol>
+<li>[2-3] 跳过用户已选定的部分</li>
+<li>[4-10]为了避免“shoud ou”这种切分的出现，其他例如“heng ao”,”lang a”都是可以的<ol>
+<li>ext_len &gt; 1 带处理拼音串大于1</li>
+<li>0 != longest_ext 当前已经获取到过候选结果</li>
+<li>0 == matrix<em>[pys_decoded_len</em> - ext_len].dmi_has_full_id 前面的拼配结果对应的拼音不是一个完整的拼音（避免错误切分的主要判断）</li>
+<li>xi_an_enabled 是为了处理像“xian”这样的拼音，如果不开启这个功能，比如当前拼音字符串是“xia”然后加入“n”这个时候我们我们首先匹配到“xian”是一个有效的数据，那么根据上边的判断之后会继续判断“x ian”,”xi an”。都会被iii的判断拦截住，所以为了处理“xi an”这种类型的拼音要放行，这个选项默认是关闭的即不处理“xi an” 这种类型的字符串。</li>
+</ol>
+</li>
+<li>[11-13]和1做一样的事情</li>
+<li>[15-16]判断oldRow是否是一个有效的匹配信息，如果不是说明这行即不是单词边界也不是拼音边界，如果当前不在组合短语状态则可以忽略（根节点是有效的，所以加入第一个拼音字符不会被这里拦截）</li>
+<li>[19-23]获取spelling id,如果没获取到则忽略,通过遍历<a href="#t1">SpellTrie</a>查找节点</li>
+<li>[24+]首先bool splid_end_split = is_split_at(oldrow + ext_len)判断当前最后一个字符是否是一个分割字符（这里的判断只要不属于[a-z,A-Z]就是分割字符）,之后进入一个内部循用于修改及增加新的搜索结果</li>
+</ol>
+<h4 id="内层for循环"><a href="#内层for循环" class="headerlink" title="内层for循环"></a>内层for循环</h4><blockquote>
+<p>这里是具体将匹配结果添加到MatrixRow中。为了生成这个匹配结果，外层循环已经将所有可能的拼音组合形式都考虑到了，那么内层循环需要考虑所有之前匹配DMI（DictMatchInfo）与新的DMI的组合形式。<br>dmi_pos : 循环变量，用于指向oldRow对应MatrixRow的所有匹配的候选词结果</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (PoolPosType dmi_pos = matrix_[oldrow].dmi_pos;</span><br><span class="line">         dmi_pos &lt; matrix_[oldrow].dmi_pos + matrix_[oldrow].dmi_num + <span class="number">1</span>;</span><br><span class="line">         dmi_pos++) &#123;</span><br><span class="line">      DictMatchInfo *dmi = dmi_pool_ + dmi_pos;</span><br><span class="line">      <span class="keyword">if</span> (dmi_pos == matrix_[oldrow].dmi_pos + matrix_[oldrow].dmi_num) &#123;</span><br><span class="line">        dmi = <span class="literal">NULL</span>;  <span class="comment">// The last one, NULL means extending from the root.</span></span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// If the dmi is covered by the fixed arrange, ignore it.</span></span><br><span class="line">        <span class="keyword">if</span> (fixed_hzs_ &gt; <span class="number">0</span> &amp;&amp;</span><br><span class="line">            pys_decoded_len_ - ext_len - dmi-&gt;splstr_len &lt;</span><br><span class="line">            spl_start_[fixed_hzs_]) &#123;</span><br><span class="line">          <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// If it is not in mode for composing phrase, and the source DMI node</span></span><br><span class="line">        <span class="comment">// is marked for composing phrase, ignore this node.</span></span><br><span class="line">        <span class="keyword">if</span> (dmi-&gt;c_phrase != <span class="number">0</span> &amp;&amp; !dmi_c_phrase_) &#123;</span><br><span class="line">          <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// For example, if "gao" is extended, "g ao" is not allowed.</span></span><br><span class="line">      <span class="comment">// or "zh" has been passed, "z h" is not allowed.</span></span><br><span class="line">      <span class="comment">// Both word and word-connection will be prevented.</span></span><br><span class="line">      <span class="keyword">if</span> (longest_ext &gt; ext_len) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="literal">NULL</span> == dmi &amp;&amp; <span class="number">0</span> == matrix_[oldrow].dmi_has_full_id) &#123;</span><br><span class="line">          <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// "z h" is not allowed.</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="literal">NULL</span> != dmi &amp;&amp; spl_trie_-&gt;is_half_id(dmi-&gt;spl_id)) &#123;</span><br><span class="line">          <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      dep_-&gt;splids_extended = <span class="number">0</span>;</span><br><span class="line">      <span class="comment">//初始化dep的信息</span></span><br><span class="line"></span><br><span class="line">      uint16 new_dmi_num;</span><br><span class="line"></span><br><span class="line">      new_dmi_num = extend_dmi(dep_, dmi);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (new_dmi_num &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        ...</span><br><span class="line">        matrix_[pys_decoded_len_].dmi_num += new_dmi_num;</span><br><span class="line">        dmi_pool_used_ += new_dmi_num;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!spl_trie_-&gt;is_half_id(spl_idx))</span><br><span class="line">          matrix_[pys_decoded_len_].dmi_has_full_id = <span class="number">1</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// If get candiate lemmas, try to extend the path</span></span><br><span class="line">      <span class="keyword">if</span> (lpi_total_ &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        uint16 fr_row;</span><br><span class="line">        <span class="keyword">if</span> (<span class="literal">NULL</span> == dmi) &#123;</span><br><span class="line">          fr_row = oldrow;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          assert(oldrow &gt;= dmi-&gt;splstr_len);</span><br><span class="line">          fr_row = oldrow - dmi-&gt;splstr_len;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (PoolPosType mtrx_nd_pos = matrix_[fr_row].mtrx_nd_pos;</span><br><span class="line">             mtrx_nd_pos &lt; matrix_[fr_row].mtrx_nd_pos +</span><br><span class="line">             matrix_[fr_row].mtrx_nd_num;</span><br><span class="line">             mtrx_nd_pos++) &#123;</span><br><span class="line">          MatrixNode *mtrx_nd = mtrx_nd_pool_ + mtrx_nd_pos;</span><br><span class="line"></span><br><span class="line">          extend_mtrx_nd(mtrx_nd, lpi_items_, lpi_total_,</span><br><span class="line">                         dmi_pool_used_ - new_dmi_num, pys_decoded_len_);</span><br><span class="line">          <span class="keyword">if</span> (longest_ext == <span class="number">0</span>)</span><br><span class="line">            longest_ext = ext_len;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;  <span class="comment">// for dmi_pos</span></span><br></pre></td></tr></table></figure>
+<p>先通过extend_dmi方法扩展DMI，然后根据扩展的DMI信息生成MatrixNode.<br><strong>extend_dmi（DictExtPara,DictMatchInfo）</strong><br>根据前边DictMatchInfo及扩展信息DictExtPara在字典中找到对应的候选词,会得到新的DictMatchInfo,和若干个LmaPsbItem<br><strong>extend_mtrx_nd</strong><a href="#q1">[?1]</a><br>如果通过<em>extend_dmi</em>获取到了候选词，就可以开始进行MatrixNode的扩展。一个MatrixRow最多含有5个MatrixNode,这5个MatrixNode就需要记录概率最高的5个组合，这个概率通过前一个MatrixNode节点及当前候选词的分数相加得到，分数越低代表这个组合的概率越高。</p>
+<p>到此新的MatrixRow生成完毕</p>
+<p><span id="s2"></span></p>
+<h3 id="词频限制"><a href="#词频限制" class="headerlink" title="词频限制"></a>词频限制</h3><p>原始词库的词频数据需要约束到一定范围内，这里的处理是把所有的词频归拢为256个值。下面看下如何进行这个过程的：</p>
+<h4 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h4><ol>
+<li>将原始的词频存储到freqs[],其中freqs[0] 为0.3.从freqs[1]开始存储数据（这样位置就和LemmaId一致了），在这个过程中同时计算出所有词频分数总和</li>
+<li>将所有词频分数除以词频分数总和，将所有词频记录转换为记录词频分数的概率</li>
+<li>分配freq<em>codes_df</em>内存，准备开始归拢词频。freq<em>codes_df</em>大小为256</li>
+<li>从freqs[]中记录256个不同的值,并对这256个值排序</li>
+<li>iterate<em>codes(freqs,idx_num</em>,freq<em>codes_df</em>,lma<em>freq_idx</em>)<br>freqs 所有的词频概率，idx_num<em> 词数，freq_codes_df</em> 词频中取出的256个不同的值 lma<em>freq_idx</em> 用户获取LemmaId与freq<em>codes_df</em>的对应关系<h4 id="核心算法"><a href="#核心算法" class="headerlink" title="核心算法"></a>核心算法</h4>这一段直接分析代码：<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">iterate_codes</span><span class="params">(<span class="keyword">double</span> freqs[], <span class="keyword">size_t</span> num, <span class="keyword">double</span> code_book[],</span></span></span><br><span class="line"><span class="function"><span class="params">                   CODEBOOK_TYPE *code_idx)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">size_t</span> iter_num = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">double</span> delta_last = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="keyword">size_t</span> changed = update_code_idx(freqs, num, code_book, code_idx);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">double</span> delta = recalculate_kernel(freqs, num, code_book, code_idx);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (kPrintDebug0) &#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">"---Unigram codebook iteration: %d : %d, %.9f\n"</span>,</span><br><span class="line">             iter_num, changed, delta);</span><br><span class="line">    &#125;</span><br><span class="line">    iter_num++;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (iter_num &gt; <span class="number">1</span> &amp;&amp;</span><br><span class="line">        (delta == <span class="number">0</span> || <span class="built_in">fabs</span>(delta_last - delta)/<span class="built_in">fabs</span>(delta) &lt; <span class="number">0.000000001</span>))</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    delta_last = delta;</span><br><span class="line">  &#125; <span class="keyword">while</span> (<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>可以观察到：结束条件为两次归拢的差距小于一个阈值。主要实现细节在update_code_idx及recalculate_kernel<br><strong>update_code_idx</strong><br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">size_t</span> update_code_idx(<span class="keyword">double</span> freqs[], <span class="keyword">size_t</span> num, <span class="keyword">double</span> code_book[],</span><br><span class="line">                       CODEBOOK_TYPE *code_idx) &#123;</span><br><span class="line">  <span class="keyword">size_t</span> changed = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">size_t</span> pos = <span class="number">0</span>; pos &lt; num; pos++) &#123;</span><br><span class="line">    CODEBOOK_TYPE idx;</span><br><span class="line">    idx = qsearch_nearest(code_book, freqs[pos], <span class="number">0</span>, kCodeBookSize - <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (idx != code_idx[pos])</span><br><span class="line">      changed++;</span><br><span class="line">    code_idx[pos] = idx;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> changed;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Find the index of the code value which is nearest to the given freq</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">qsearch_nearest</span><span class="params">(<span class="keyword">double</span> code_book[], <span class="keyword">double</span> freq, <span class="keyword">int</span> start, <span class="keyword">int</span> end)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (start == end)</span><br><span class="line">    <span class="keyword">return</span> start;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (start + <span class="number">1</span> == end) &#123;</span><br><span class="line">    <span class="keyword">if</span> (distance(freq, code_book[end]) &gt; distance(freq, code_book[start]))</span><br><span class="line">      <span class="keyword">return</span> start;</span><br><span class="line">    <span class="keyword">return</span> end;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> mid = (start + end) / <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (code_book[mid] &gt; freq)</span><br><span class="line">    <span class="keyword">return</span> qsearch_nearest(code_book, freq, start, mid);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="keyword">return</span> qsearch_nearest(code_book, freq, mid, end);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="keyword">double</span> <span class="title">distance</span><span class="params">(<span class="keyword">double</span> freq, <span class="keyword">double</span> code)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// return fabs(freq - code);</span></span><br><span class="line">  <span class="keyword">return</span> freq * <span class="built_in">fabs</span>(<span class="built_in">log</span>(freq) - <span class="built_in">log</span>(code));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>qsearch_nearset 是二分查找到最接近给定分数的位置。所以这个方法做的事情就是记录freqs[]与code_book[]的对应关系，并返回这次计算与上次计算不同的值的数量。freqs[]就是所有词的词频，code_book[]就是需要归拢的256个值。功能就是更新code_idx(用于LemmaId到归拢词频的映射关系)<br><strong>recalculate_kernel</strong><br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">double</span> <span class="title">recalculate_kernel</span><span class="params">(<span class="keyword">double</span> freqs[], <span class="keyword">size_t</span> num, <span class="keyword">double</span> code_book[],</span></span></span><br><span class="line"><span class="function"><span class="params">                          CODEBOOK_TYPE *code_idx)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">double</span> ret = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">size_t</span> *item_num =  <span class="keyword">new</span> <span class="keyword">size_t</span>[kCodeBookSize];</span><br><span class="line">  assert(item_num);</span><br><span class="line">  <span class="built_in">memset</span>(item_num, <span class="number">0</span>, <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>) * kCodeBookSize);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">double</span> *cb_new = <span class="keyword">new</span> <span class="keyword">double</span>[kCodeBookSize];</span><br><span class="line">  assert(cb_new);</span><br><span class="line">  <span class="built_in">memset</span>(cb_new, <span class="number">0</span>, <span class="keyword">sizeof</span>(<span class="keyword">double</span>) * kCodeBookSize);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">size_t</span> pos = <span class="number">0</span>; pos &lt; num; pos++) &#123;</span><br><span class="line">    ret += distance(freqs[pos], code_book[code_idx[pos]]);</span><br><span class="line"></span><br><span class="line">    cb_new[code_idx[pos]] += freqs[pos];</span><br><span class="line">    item_num[code_idx[pos]] += <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">size_t</span> code = <span class="number">0</span>; code &lt; kCodeBookSize; code++) &#123;</span><br><span class="line">    assert(item_num[code] &gt; <span class="number">0</span>);</span><br><span class="line">    code_book[code] = cb_new[code] / item_num[code];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">delete</span> [] item_num;</span><br><span class="line">  <span class="keyword">delete</span> [] cb_new;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在准备工作中，只是从所有词频中取出256个不同的值而已，所以为了得到合适的结果还是要重新计算和修改这256个值。主要逻辑是按照之前计算出的归拢词频，找出所有对应的原始词频并计算平均值，再把这些计算的平均值设置为新的归拢瓷瓶，然后把累计的偏差值返回（用于判断是否可以结束整个离散的计算）。</p>
+<h4 id="收尾工作"><a href="#收尾工作" class="headerlink" title="收尾工作"></a>收尾工作</h4><p>由于这里计算出的数据为（0,1）的double型小数。要缩小这个精度范围到float，转换方式如下：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span> NGram::convert_psb_to_score(<span class="keyword">double</span> psb) &#123;</span><br><span class="line">  <span class="keyword">float</span> score = <span class="keyword">static_cast</span>&lt;<span class="keyword">float</span>&gt;(</span><br><span class="line">      <span class="built_in">log</span>(psb) * <span class="keyword">static_cast</span>&lt;<span class="keyword">double</span>&gt;(kLogValueAmplifier));</span><br><span class="line">  <span class="keyword">if</span> (score &gt; <span class="keyword">static_cast</span>&lt;<span class="keyword">float</span>&gt;(kMaxScore)) &#123;</span><br><span class="line">    score = <span class="keyword">static_cast</span>&lt;<span class="keyword">float</span>&gt;(kMaxScore);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> score;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中kLogValueAmplifier为-800，(0,1)做对数为负数。所以最后的词频分数越小那么它的词频概率就越高<br><span id="s3"></span></p>
+<h3 id="通过拼音字符串获取spl-id"><a href="#通过拼音字符串获取spl-id" class="headerlink" title="通过拼音字符串获取spl_id"></a>通过拼音字符串获取spl_id</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line">uint16 SpellingParser::splstr_to_idxs(<span class="keyword">const</span> <span class="keyword">char</span> *splstr, uint16 str_len,</span><br><span class="line">                                      uint16 spl_idx[], uint16 start_pos[],</span><br><span class="line">                                      uint16 max_size, <span class="keyword">bool</span> &amp;last_is_pre) &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="literal">NULL</span> == splstr || <span class="number">0</span> == max_size || <span class="number">0</span> == str_len)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!SpellingTrie::is_valid_spl_char(splstr[<span class="number">0</span>]))</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  last_is_pre = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> SpellingNode *node_this = spl_trie_-&gt;root_;</span><br><span class="line"></span><br><span class="line">  uint16 str_pos = <span class="number">0</span>;</span><br><span class="line">  uint16 idx_num = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">if</span> (<span class="literal">NULL</span> != start_pos)</span><br><span class="line">    start_pos[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">bool</span> last_is_splitter = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (str_pos &lt; str_len) &#123;</span><br><span class="line">    <span class="keyword">char</span> char_this = splstr[str_pos];</span><br><span class="line">    <span class="comment">// all characters outside of [a, z] are considered as splitters</span></span><br><span class="line">    <span class="keyword">if</span> (!SpellingTrie::is_valid_spl_char(char_this)) &#123;</span><br><span class="line">      <span class="comment">// test if the current node is endable</span></span><br><span class="line">      uint16 id_this = node_this-&gt;spelling_idx;</span><br><span class="line">      <span class="keyword">if</span> (spl_trie_-&gt;if_valid_id_update(&amp;id_this)) &#123;</span><br><span class="line">        spl_idx[idx_num] = id_this;</span><br><span class="line"></span><br><span class="line">        idx_num++;</span><br><span class="line">        str_pos++;</span><br><span class="line">        <span class="keyword">if</span> (<span class="literal">NULL</span> != start_pos)</span><br><span class="line">          start_pos[idx_num] = str_pos;</span><br><span class="line">        <span class="keyword">if</span> (idx_num &gt;= max_size)</span><br><span class="line">          <span class="keyword">return</span> idx_num;</span><br><span class="line"></span><br><span class="line">        node_this = spl_trie_-&gt;root_;</span><br><span class="line">        last_is_splitter = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (last_is_splitter) &#123;</span><br><span class="line">          str_pos++;</span><br><span class="line">          <span class="keyword">if</span> (<span class="literal">NULL</span> != start_pos)</span><br><span class="line">            start_pos[idx_num] = str_pos;</span><br><span class="line">          <span class="keyword">continue</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">return</span> idx_num;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    last_is_splitter = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    SpellingNode *found_son = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0</span> == str_pos) &#123;</span><br><span class="line">      <span class="keyword">if</span> (char_this &gt;= <span class="string">'a'</span>)</span><br><span class="line">        found_son = spl_trie_-&gt;level1_sons_[char_this - <span class="string">'a'</span>];</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">        found_son = spl_trie_-&gt;level1_sons_[char_this - <span class="string">'A'</span>];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      SpellingNode *first_son = node_this-&gt;first_son;</span><br><span class="line">      <span class="comment">// Because for Zh/Ch/Sh nodes, they are the last in the buffer and</span></span><br><span class="line">      <span class="comment">// frequently used, so we scan from the end.</span></span><br><span class="line">      <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; node_this-&gt;num_of_son; i++) &#123;</span><br><span class="line">        SpellingNode *this_son = first_son + i;</span><br><span class="line">        <span class="keyword">if</span> (SpellingTrie::is_same_spl_char(</span><br><span class="line">            this_son-&gt;char_this_node, char_this)) &#123;</span><br><span class="line">          found_son = this_son;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// found, just move the current node pointer to the the son</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">NULL</span> != found_son) &#123;</span><br><span class="line">      node_this = found_son;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// not found, test if it is endable</span></span><br><span class="line">      uint16 id_this = node_this-&gt;spelling_idx;</span><br><span class="line">      <span class="keyword">if</span> (spl_trie_-&gt;if_valid_id_update(&amp;id_this)) &#123;</span><br><span class="line">        <span class="comment">// endable, remember the index</span></span><br><span class="line">        spl_idx[idx_num] = id_this;</span><br><span class="line"></span><br><span class="line">        idx_num++;</span><br><span class="line">        <span class="keyword">if</span> (<span class="literal">NULL</span> != start_pos)</span><br><span class="line">          start_pos[idx_num] = str_pos;</span><br><span class="line">        <span class="keyword">if</span> (idx_num &gt;= max_size)</span><br><span class="line">          <span class="keyword">return</span> idx_num;</span><br><span class="line">        node_this = spl_trie_-&gt;root_;</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> idx_num;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    str_pos++;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  uint16 id_this = node_this-&gt;spelling_idx;</span><br><span class="line">  <span class="keyword">if</span> (spl_trie_-&gt;if_valid_id_update(&amp;id_this)) &#123;</span><br><span class="line">    <span class="comment">// endable, remember the index</span></span><br><span class="line">    spl_idx[idx_num] = id_this;</span><br><span class="line"></span><br><span class="line">    idx_num++;</span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">NULL</span> != start_pos)</span><br><span class="line">      start_pos[idx_num] = str_pos;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  last_is_pre = !last_is_splitter;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> idx_num;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><span id="s4"></span></p>
+<h3 id="get-spl-start-id"><a href="#get-spl-start-id" class="headerlink" title="get_spl_start_id"></a>get_spl_start_id</h3><blockquote>
+<p>通过MatrixNode及DictMatchInfo生成拼音和词语的对应关系</p>
+</blockquote>
+<ol>
+<li>获取词语及拼音的对应关系<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">MatrixNode *mtrx_nd = mtrx_nd_pool_ + matrix_[pys_decoded_len_].mtrx_nd_pos;</span><br><span class="line"><span class="keyword">while</span> (mtrx_nd != mtrx_nd_pool_) &#123;</span><br><span class="line">  <span class="keyword">if</span> (fixed_hzs_ &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (mtrx_nd-&gt;step &lt;= spl_start_[fixed_hzs_])</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Update the spelling segamentation information</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">char</span> word_splstr_len = <span class="number">0</span>;</span><br><span class="line">  PoolPosType dmi_fr = mtrx_nd-&gt;dmi_fr;</span><br><span class="line">  <span class="keyword">if</span> ((PoolPosType)<span class="number">-1</span> != dmi_fr)</span><br><span class="line">    word_splstr_len = dmi_pool_[dmi_fr].splstr_len;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> ((PoolPosType)<span class="number">-1</span> != dmi_fr) &#123;</span><br><span class="line">    spl_start_[spl_id_num_ + <span class="number">1</span>] = mtrx_nd-&gt;step -</span><br><span class="line">        (word_splstr_len - dmi_pool_[dmi_fr].splstr_len);</span><br><span class="line">    spl_id_[spl_id_num_] = dmi_pool_[dmi_fr].spl_id;</span><br><span class="line">    spl_id_num_++;</span><br><span class="line">    dmi_fr = dmi_pool_[dmi_fr].dmi_fr;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Update the lemma segmentation information</span></span><br><span class="line">  lma_start_[lma_id_num_ + <span class="number">1</span>] = spl_id_num_;</span><br><span class="line">  lma_id_[lma_id_num_] = mtrx_nd-&gt;id;</span><br><span class="line">  lma_id_num_++;</span><br><span class="line"></span><br><span class="line">  mtrx_nd = mtrx_nd-&gt;from;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>spl_start<em>保存拼音在字符串中的偏移量，spl_id</em>保存具体指向的拼音，lma_start<em>保存词语对应拼音串的起始位置，lma_id</em>保存词语信息</p>
+<ol>
+<li><p>翻转上一步解析的结果，上一步获取的结果与实际输入为相反的（通过异或做值的交换）</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Reverse the result of spelling info</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">size_t</span> pos = fixed_hzs_;</span><br><span class="line">       pos &lt; fixed_hzs_ + (spl_id_num_ - fixed_hzs_ + <span class="number">1</span>) / <span class="number">2</span>; pos++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (spl_id_num_ + fixed_hzs_ - pos != pos + <span class="number">1</span>) &#123;</span><br><span class="line">      spl_start_[pos + <span class="number">1</span>] ^= spl_start_[spl_id_num_ - pos + fixed_hzs_];</span><br><span class="line">      spl_start_[spl_id_num_ - pos + fixed_hzs_] ^= spl_start_[pos + <span class="number">1</span>];</span><br><span class="line">      spl_start_[pos + <span class="number">1</span>] ^= spl_start_[spl_id_num_ - pos + fixed_hzs_];</span><br><span class="line"></span><br><span class="line">      spl_id_[pos] ^= spl_id_[spl_id_num_ + fixed_hzs_ - pos - <span class="number">1</span>];</span><br><span class="line">      spl_id_[spl_id_num_ + fixed_hzs_- pos - <span class="number">1</span>] ^= spl_id_[pos];</span><br><span class="line">      spl_id_[pos] ^= spl_id_[spl_id_num_ + fixed_hzs_- pos - <span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Reverse the result of lemma info</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">size_t</span> pos = fixed_lmas_;</span><br><span class="line">       pos &lt; fixed_lmas_ + (lma_id_num_ - fixed_lmas_ + <span class="number">1</span>) / <span class="number">2</span>; pos++) &#123;</span><br><span class="line">    assert(lma_id_num_ + fixed_lmas_ - pos - <span class="number">1</span> &gt;= pos);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (lma_id_num_ + fixed_lmas_ - pos &gt; pos + <span class="number">1</span>) &#123;</span><br><span class="line">      lma_start_[pos + <span class="number">1</span>] ^= lma_start_[lma_id_num_ - pos + fixed_lmas_];</span><br><span class="line">      lma_start_[lma_id_num_ - pos + fixed_lmas_] ^= lma_start_[pos + <span class="number">1</span>];</span><br><span class="line">      lma_start_[pos + <span class="number">1</span>] ^= lma_start_[lma_id_num_ - pos + fixed_lmas_];</span><br><span class="line"></span><br><span class="line">      lma_id_[pos] ^= lma_id_[lma_id_num_ - <span class="number">1</span> - pos + fixed_lmas_];</span><br><span class="line">      lma_id_[lma_id_num_ - <span class="number">1</span> - pos + fixed_lmas_] ^= lma_id_[pos];</span><br><span class="line">      lma_id_[pos] ^= lma_id_[lma_id_num_ - <span class="number">1</span> - pos + fixed_lmas_];</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修正lma_start的值</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">size_t</span> pos = fixed_lmas_ + <span class="number">1</span>; pos &lt;= lma_id_num_; pos++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (pos &lt; lma_id_num_)</span><br><span class="line">      lma_start_[pos] = lma_start_[pos - <span class="number">1</span>] +</span><br><span class="line">          (lma_start_[pos] - lma_start_[pos + <span class="number">1</span>]);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">      lma_start_[pos] = lma_start_[pos - <span class="number">1</span>] + lma_start_[pos] -</span><br><span class="line">          lma_start_[fixed_lmas_];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//例如“啊 啊啊 啊啊啊”，第一步之后lma_start为3,5,6，翻转之后是6,5,3但我们实际需要的是1,3,6</span></span><br><span class="line">  <span class="comment">//'作为分割提示不是实际字符串，例如：</span></span><br><span class="line">  <span class="comment">//“修改'翻转'字符串'偏移值”,每个单词的偏移值为0,2,4,7</span></span><br><span class="line">  <span class="comment">//翻转之后变为“偏移值'字符串'翻转'修改”，对原来的偏移值也做翻转7,4,2,0，可以把这个看做从右向左的偏移值</span></span><br><span class="line">  <span class="comment">//之后可以通过偏移值计算出每个词语的长度，重新计算出从左至右的偏移值。</span></span><br><span class="line">  <span class="comment">//字符串总长度为10，可以计算出偏移值为0,10-7=3,3 + 7 - 4 = 6,6 + 4 - 2 = 8。即0,3,6,8</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="MatrixSearch-get-predicts"><a href="#MatrixSearch-get-predicts" class="headerlink" title="MatrixSearch::get_predicts"></a>MatrixSearch::get_predicts</h3><blockquote>
+<p>输入一个固定的字符串，输出一个字符串列表</p>
+</blockquote>
+<p>具体调用为MatrixSearch::inner_predict,默认输出最大值为500。假设前缀字符长度为i，后缀的字符长度为j，P(i,j)为对应的预测结果集合，设前缀长度为N，最大字符长度为M<br><img src="/2018/01/21/GooglePinyin分析/d.png" alt="图5"></p>
+<ol>
+<li>首先是一个循环，为了得到所有的预测结果。例如：已确定的字符串“拼音”，我们要先对“拼音”，“音”都进行预测。</li>
+<li><p>使用系统及用户词库执行预测操作，具体的预测操作在DictList::predict</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (uint16 pre_len = <span class="number">1</span>; pre_len &lt;= kMaxPredictSize + <span class="number">1</span> - hzs_len;</span><br><span class="line">      pre_len++) &#123;</span><br><span class="line">   uint16 word_len = hzs_len + pre_len;</span><br><span class="line">   char16 *w_buf = find_pos_startedbyhzs(last_hzs, word_len, cmp_func);</span><br><span class="line">   <span class="keyword">if</span> (<span class="literal">NULL</span> == w_buf)</span><br><span class="line">     <span class="keyword">continue</span>;</span><br><span class="line">   <span class="keyword">while</span> (w_buf &lt; buf_ + start_pos_[word_len] &amp;&amp;</span><br><span class="line">          cmp_func(w_buf, last_hzs) == <span class="number">0</span> &amp;&amp;</span><br><span class="line">          item_num &lt; npre_max) &#123;</span><br><span class="line">     <span class="built_in">memset</span>(npre_items + item_num, <span class="number">0</span>, <span class="keyword">sizeof</span>(NPredictItem));</span><br><span class="line">     utf16_strncpy(npre_items[item_num].pre_hzs, w_buf + hzs_len, pre_len);</span><br><span class="line">     npre_items[item_num].psb =</span><br><span class="line">       ngram.get_uni_psb((<span class="keyword">size_t</span>)(w_buf - buf_ - start_pos_[word_len - <span class="number">1</span>])</span><br><span class="line">                         / word_len + start_id_[word_len - <span class="number">1</span>]);</span><br><span class="line">     npre_items[item_num].his_len = hzs_len;</span><br><span class="line">     item_num++;</span><br><span class="line">     w_buf += word_len;</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>最后对结果排序，所有预测的词语就完成了</p>
+</li>
+</ol>
+<p><span id="conclusion"></span></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h3 id="词库"><a href="#词库" class="headerlink" title="词库"></a>词库</h3><ul>
+<li>拼音查找树 （单个字母做key）</li>
+<li>词语查找树 （拼音作为Key）</li>
+</ul>
+<h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><p>每输入一个字母，获取当前整个输入的所有可能的拼音组成形式，再对所有可能的拼音组合获取候选词。跟查询相关里会有MatrixRow,MatrixNode,DictMatchInfo这几个数据结构，它们的作用就是用来将“nihao”这样的字母串分割为“ni hao”这样的拼音串（这个过程可以查看<a href="#s4">get_spl_start_id</a>）。然后通过拼音串就可以在词库中找到对应的候选词了。</p>
+<h3 id="预测词语"><a href="#预测词语" class="headerlink" title="预测词语"></a>预测词语</h3><p>根据给定的几个汉字前缀，到汉字总串中查询。这样就可以获取到词语id及相应的分数。最后排序一下，结果就是预测的词语集</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p><span id="q1"></span></p>
+<h3 id="扩展MatrixNode的时候终止循环的条件"><a href="#扩展MatrixNode的时候终止循环的条件" class="headerlink" title="扩展MatrixNode的时候终止循环的条件"></a>扩展MatrixNode的时候终止循环的条件</h3><blockquote>
+<p>个人觉得已知一行MatrixNode的最大数量，如果达到最大数量的话只要新的分数大于当前最高分数，就可以终止循环了。但实际是通过一个阈值来判断如果分数与最小分数大于这个差距作为终止循环的条件</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">size_t</span> MatrixSearch::extend_mtrx_nd(MatrixNode *mtrx_nd, LmaPsbItem lpi_items[],</span><br><span class="line">                                    <span class="keyword">size_t</span> lpi_num, PoolPosType dmi_fr,</span><br><span class="line">                                    <span class="keyword">size_t</span> res_row) &#123;</span><br><span class="line">  assert(<span class="literal">NULL</span> != mtrx_nd);</span><br><span class="line">  matrix_[res_row].mtrx_nd_fixed = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (mtrx_nd_pool_used_ &gt;= kMtrxNdPoolSize - kMaxNodeARow)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (<span class="number">0</span> == mtrx_nd-&gt;step) &#123;</span><br><span class="line">    <span class="comment">// Because the list is sorted, if the source step is 0, it is only</span></span><br><span class="line">    <span class="comment">// necessary to pick up the first kMaxNodeARow items.</span></span><br><span class="line">    <span class="keyword">if</span> (lpi_num &gt; kMaxNodeARow)</span><br><span class="line">      lpi_num = kMaxNodeARow;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  MatrixNode *mtrx_nd_res_min = mtrx_nd_pool_ + matrix_[res_row].mtrx_nd_pos;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">size_t</span> pos = <span class="number">0</span>; pos &lt; lpi_num; pos++) &#123;</span><br><span class="line">    <span class="keyword">float</span> score = mtrx_nd-&gt;score + lpi_items[pos].psb;</span><br><span class="line">    <span class="keyword">if</span> (pos &gt; <span class="number">0</span> &amp;&amp; score - PRUMING_SCORE &gt; mtrx_nd_res_min-&gt;score)</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Try to add a new node</span></span><br><span class="line">    <span class="keyword">size_t</span> mtrx_nd_num = matrix_[res_row].mtrx_nd_num;</span><br><span class="line">    MatrixNode *mtrx_nd_res = mtrx_nd_res_min + mtrx_nd_num;</span><br><span class="line">    <span class="keyword">bool</span> replace = <span class="literal">false</span>;</span><br><span class="line">    <span class="comment">// Find its position</span></span><br><span class="line">    <span class="keyword">while</span> (mtrx_nd_res &gt; mtrx_nd_res_min &amp;&amp; score &lt; (mtrx_nd_res - <span class="number">1</span>)-&gt;score) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">static_cast</span>&lt;<span class="keyword">size_t</span>&gt;(mtrx_nd_res - mtrx_nd_res_min) &lt; kMaxNodeARow)</span><br><span class="line">        *mtrx_nd_res = *(mtrx_nd_res - <span class="number">1</span>);</span><br><span class="line">      mtrx_nd_res--;</span><br><span class="line">      replace = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (replace || (mtrx_nd_num &lt; kMaxNodeARow &amp;&amp;</span><br><span class="line">        matrix_[res_row].mtrx_nd_pos + mtrx_nd_num &lt; kMtrxNdPoolSize)) &#123;</span><br><span class="line">      mtrx_nd_res-&gt;id = lpi_items[pos].id;</span><br><span class="line">      mtrx_nd_res-&gt;score = score;</span><br><span class="line">      mtrx_nd_res-&gt;from = mtrx_nd;</span><br><span class="line">      mtrx_nd_res-&gt;dmi_fr = dmi_fr;</span><br><span class="line">      mtrx_nd_res-&gt;step = res_row;</span><br><span class="line">      <span class="keyword">if</span> (matrix_[res_row].mtrx_nd_num &lt; kMaxNodeARow)</span><br><span class="line">        matrix_[res_row].mtrx_nd_num++;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> matrix_[res_row].mtrx_nd_num;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pinyin/" rel="tag">#pinyin</a>
+          
+            <a href="/tags/ime/" rel="tag">#ime</a>
+          
+            <a href="/tags/分析/" rel="tag">#分析</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/30/ss-panel配合shadowsocks-manyuser搭建多用户shadowsocks站点/" rel="next" title="ss-panel配合shadowsocks-manyuser搭建多用户shadowsocks站点">
+                <i class="fa fa-chevron-left"></i> ss-panel配合shadowsocks-manyuser搭建多用户shadowsocks站点
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/10/麻将取牌概率分析/" rel="prev" title="麻将取牌概率分析">
+                麻将取牌概率分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="gitalk-container"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.jpeg" alt="AlphaBoom">
+          <p class="site-author-name" itemprop="name">AlphaBoom</p>
+          <p class="site-description motion-element" itemprop="description">AlphaBoom的博客欢迎莅临</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/">
+              <span class="site-state-item-count">12</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/AlphaBoom" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="tencent://message/?uin=2439100920&Site=alphaboom.github.io&Menu=yes" target="_blank" title="QQ">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  QQ
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#词库原始数据"><span class="nav-number">2.</span> <span class="nav-text">词库原始数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#构建词库"><span class="nav-number">3.</span> <span class="nav-text">构建词库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基础数据结构分析"><span class="nav-number">4.</span> <span class="nav-text">基础数据结构分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LemmaId-作为词语的身份标识"><span class="nav-number">4.1.</span> <span class="nav-text">LemmaId 作为词语的身份标识</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#spl-id-作为拼音的标志"><span class="nav-number">4.2.</span> <span class="nav-text">spl_id 作为拼音的标志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SpellingTrie"><span class="nav-number">4.3.</span> <span class="nav-text">SpellingTrie</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#关于拼音"><span class="nav-number">4.3.1.</span> <span class="nav-text">关于拼音</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#输入法中对声母韵母的区分"><span class="nav-number">4.3.2.</span> <span class="nav-text">输入法中对声母韵母的区分</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LmaNodeLE0，LmaNodeGE1"><span class="nav-number">4.4.</span> <span class="nav-text">LmaNodeLE0，LmaNodeGE1</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LmaNodeLE0"><span class="nav-number">4.4.1.</span> <span class="nav-text">LmaNodeLE0</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LmaNodeGE1"><span class="nav-number">4.4.2.</span> <span class="nav-text">LmaNodeGE1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LmaNode"><span class="nav-number">4.4.3.</span> <span class="nav-text">LmaNode</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取词频（NGram）"><span class="nav-number">4.5.</span> <span class="nav-text">获取词频（NGram）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过拼音查询结果"><span class="nav-number">4.6.</span> <span class="nav-text">通过拼音查询结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MatrixRow"><span class="nav-number">4.6.1.</span> <span class="nav-text">MatrixRow</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MatixNode"><span class="nav-number">4.6.2.</span> <span class="nav-text">MatixNode</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DictMatchInfo"><span class="nav-number">4.6.3.</span> <span class="nav-text">DictMatchInfo</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#通过输入法的使用流程对输入法进行分析"><span class="nav-number">5.</span> <span class="nav-text">通过输入法的使用流程对输入法进行分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#输入拼音"><span class="nav-number">5.1.</span> <span class="nav-text">输入拼音</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MatrixSearch-add-char-char-ch"><span class="nav-number">5.1.1.</span> <span class="nav-text">MatrixSearch::add_char(char ch)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MatrixSearch-get-spl-start-id"><span class="nav-number">5.1.2.</span> <span class="nav-text">MatrixSearch::get_spl_start_id()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MatrixSearch-prepare-candidates"><span class="nav-number">5.1.3.</span> <span class="nav-text">MatrixSearch::prepare_candidates()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#展示候选词"><span class="nav-number">5.2.</span> <span class="nav-text">展示候选词</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MatrixSearch-get-candidate"><span class="nav-number">5.2.1.</span> <span class="nav-text">MatrixSearch::get_candidate</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MatrixSearch-getPredictItem"><span class="nav-number">5.2.2.</span> <span class="nav-text">MatrixSearch::getPredictItem</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选择候选词"><span class="nav-number">5.3.</span> <span class="nav-text">选择候选词</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#补充"><span class="nav-number">6.</span> <span class="nav-text">补充</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#add-char-qwerty匹配规则部分"><span class="nav-number">6.1.</span> <span class="nav-text">add_char_qwerty匹配规则部分</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#外层for循环"><span class="nav-number">6.1.1.</span> <span class="nav-text">外层for循环</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#内层for循环"><span class="nav-number">6.1.2.</span> <span class="nav-text">内层for循环</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#词频限制"><span class="nav-number">6.2.</span> <span class="nav-text">词频限制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#准备工作"><span class="nav-number">6.2.1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#核心算法"><span class="nav-number">6.2.2.</span> <span class="nav-text">核心算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#收尾工作"><span class="nav-number">6.2.3.</span> <span class="nav-text">收尾工作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过拼音字符串获取spl-id"><span class="nav-number">6.3.</span> <span class="nav-text">通过拼音字符串获取spl_id</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#get-spl-start-id"><span class="nav-number">6.4.</span> <span class="nav-text">get_spl_start_id</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MatrixSearch-get-predicts"><span class="nav-number">6.5.</span> <span class="nav-text">MatrixSearch::get_predicts</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#词库"><span class="nav-number">7.1.</span> <span class="nav-text">词库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询"><span class="nav-number">7.2.</span> <span class="nav-text">查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#预测词语"><span class="nav-number">7.3.</span> <span class="nav-text">预测词语</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后记"><span class="nav-number">8.</span> <span class="nav-text">后记</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#扩展MatrixNode的时候终止循环的条件"><span class="nav-number">8.1.</span> <span class="nav-text">扩展MatrixNode的时候终止循环的条件</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">AlphaBoom</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+  <script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+   <script type="text/javascript">
+        var gitalk = new Gitalk({
+          clientID: 'a6a9a35cef5cdbb6edde',
+          clientSecret: '3f2c90685ef385c63cb4bc8de7d8745a9d359091',
+          repo: 'alphaboom.github.io',
+          owner: 'alphaboom',
+          admin: ['alphaboom'],
+          id: md5(location.pathname),
+          distractionFreeMode: 'true'
+        })
+        gitalk.render('gitalk-container')           
+       </script>
+
+
+  
+  
+
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+  </script>
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+    });
+  </script>
+  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  
+
+  
+
+  
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/assets/shizuku.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config("");
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end --></body>
+</html>

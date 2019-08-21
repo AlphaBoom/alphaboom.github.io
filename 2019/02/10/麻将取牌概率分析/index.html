@@ -1,0 +1,674 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="麻将,数列,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2">
+
+
+
+
+
+
+<meta name="description" content="前言由于要实现麻将听牌查表算法，所以先考虑下在麻将34种136张牌下取14张并且不重复的概率。 分析不去重的状况下有多少种可能如果不考虑去重的情况，那么结果可以很简单的变为从136张牌中取14张牌的组合有多少的问题。表示为\(\begin{pmatrix}136\\14\\ \end{pmatrix}\)即4,250,305,029,168,215,552约425京(一京为,\(10^{16}\)">
+<meta name="keywords" content="麻将,数列">
+<meta property="og:type" content="article">
+<meta property="og:title" content="麻将取牌概率分析">
+<meta property="og:url" content="http://yoursite.com/2019/02/10/麻将取牌概率分析/index.html">
+<meta property="og:site_name" content="AlphaBoom">
+<meta property="og:description" content="前言由于要实现麻将听牌查表算法，所以先考虑下在麻将34种136张牌下取14张并且不重复的概率。 分析不去重的状况下有多少种可能如果不考虑去重的情况，那么结果可以很简单的变为从136张牌中取14张牌的组合有多少的问题。表示为\(\begin{pmatrix}136\\14\\ \end{pmatrix}\)即4,250,305,029,168,215,552约425京(一京为,\(10^{16}\)">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-08-21T15:14:51.686Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="麻将取牌概率分析">
+<meta name="twitter:description" content="前言由于要实现麻将听牌查表算法，所以先考虑下在麻将34种136张牌下取14张并且不重复的概率。 分析不去重的状况下有多少种可能如果不考虑去重的情况，那么结果可以很简单的变为从136张牌中取14张牌的组合有多少的问题。表示为\(\begin{pmatrix}136\\14\\ \end{pmatrix}\)即4,250,305,029,168,215,552约425京(一京为,\(10^{16}\)">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/02/10/麻将取牌概率分析/">
+
+
+  <title> 麻将取牌概率分析 | AlphaBoom </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">AlphaBoom</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个世界需要更多英雄😁</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                麻将取牌概率分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2019-02-10T12:33:21+08:00" content="2019-02-10">
+              2019-02-10
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>由于要实现麻将听牌查表算法，所以先考虑下在麻将34种136张牌下取14张并且不重复的概率。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><h3 id="不去重的状况下有多少种可能"><a href="#不去重的状况下有多少种可能" class="headerlink" title="不去重的状况下有多少种可能"></a>不去重的状况下有多少种可能</h3><p>如果不考虑去重的情况，那么结果可以很简单的变为从136张牌中取14张牌的组合有多少的问题。表示为\(\begin{pmatrix}136\\14\\ \end{pmatrix}\)<br>即4,250,305,029,168,215,552约425京(一京为,\(10^{16}\)一种麻将最多是4张所以这个里面有大量重复的数据。（首先看下这个数量级，一个64位二进制可以表示的最大数是1.844674E+19，可见将这么大的数据建表是不现实的）<br><a id="more"></a></p>
+<h3 id="求通项式"><a href="#求通项式" class="headerlink" title="求通项式"></a>求通项式</h3><blockquote>
+<p>通过推导通项式并借助动态规划在计算机上计算结果</p>
+</blockquote>
+<p>设\(\large i \)表示牌种类,\(\large j\)表示牌张数,\(\Large a_{i,j}\)表示i种牌j张牌的情况下的组合数量。接下来考虑\(\Large a_{i,j}\)的性质。比如我们要计算\(\Large a_{4,5}\)时应该考虑以下几种情况：</p>
+<ul>
+<li>新的种类一个都不添加时的情况：\(\Large a_{3,5}\)</li>
+<li>新的种类添加一个时：\(\Large a_{3,4}\)</li>
+<li>新的种类添加两个时：\(\Large a_{3,3}\)</li>
+<li>新的种类添加三个时：\(\Large a_{3,2}\)</li>
+<li>新的种类添加四个时：\(\Large a_{3,1}\)</li>
+</ul>
+<p>对应：</p>
+<script type="math/tex; mode=display">a_{4,5}=a_{3,5} +a_{3,4} + a_{3,3} + a_{3,2} + a_{3,1}</script><p>可以得到对应的公式：</p>
+<script type="math/tex; mode=display">{\LARGE a_{i,j}}=\left\{ \begin{array}{ccl} \sum\limits_{k=j-4}^j a_{i-1,k}&  &i >1 ,j>=0\ and \ j <=4i\\\\[1ex]1&&i=1,j=0,1,2,3,4\\\\[1ex]0&&i<=0\ or\ j < 0\ or\  j >4i \end{array}\tag1\right.​</script><p>这个公式需要\(i&gt;1\)并且当j为负数或\( j&gt;4*i \)时\(\Large a_{i,j}\)为0(即这种取法不存在)。当\(i=1\)时我们可以得到\( a_{1,0}\space a_{1,1}\space  a_{1,2}\space a_{1,3}\space a_{1,4} \)都为1。（取零张是允许的视为一种）</p>
+<h4 id="编写代码计算"><a href="#编写代码计算" class="headerlink" title="编写代码计算"></a>编写代码计算</h4><blockquote>
+<p>下面使用Python进行简单的代码编写</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">A</span><span class="params">(i, j)</span>:</span></span><br><span class="line">    ans = [[<span class="number">0</span>]*(j + <span class="number">1</span>) <span class="keyword">for</span> _ <span class="keyword">in</span> range(<span class="number">0</span>, i)]</span><br><span class="line">    <span class="keyword">for</span> n <span class="keyword">in</span> range(<span class="number">0</span>,min(<span class="number">5</span>, j + <span class="number">1</span>)):</span><br><span class="line">        ans[<span class="number">0</span>][n] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> k <span class="keyword">in</span> range(<span class="number">1</span>, i):</span><br><span class="line">        <span class="comment"># 计算每个种类的数据</span></span><br><span class="line">        <span class="keyword">for</span> l <span class="keyword">in</span> range(<span class="number">0</span>, min((j + <span class="number">1</span>), <span class="number">4</span> * (k+<span class="number">1</span>) + <span class="number">1</span>)):</span><br><span class="line">            <span class="comment"># 计算每种张数对应的值</span></span><br><span class="line">            <span class="keyword">for</span> m <span class="keyword">in</span> range(max(<span class="number">0</span>, l - <span class="number">4</span>), l + <span class="number">1</span>):</span><br><span class="line">                ans[k][l] += ans[k - <span class="number">1</span>][m]</span><br><span class="line">    <span class="keyword">return</span> ans[i - <span class="number">1</span>][j]</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    print(<span class="string">"所有组合可能个数:&#123;&#125;"</span>.format(A(<span class="number">34</span>,<span class="number">14</span>)))</span><br></pre></td></tr></table></figure>
+<p>运行得到结果为:326,520,504,500也就是3265亿种组合。</p>
+<h3 id="求通项代数式"><a href="#求通项代数式" class="headerlink" title="求通项代数式"></a>求通项代数式</h3><blockquote>
+<p>没求出来</p>
+</blockquote>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/麻将/" rel="tag">#麻将</a>
+          
+            <a href="/tags/数列/" rel="tag">#数列</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/21/GooglePinyin分析/" rel="next" title="GooglePinyin分析">
+                <i class="fa fa-chevron-left"></i> GooglePinyin分析
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/13/V2Ray使用指南/" rel="prev" title="V2Ray使用指南">
+                V2Ray使用指南 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="gitalk-container"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.jpeg" alt="AlphaBoom">
+          <p class="site-author-name" itemprop="name">AlphaBoom</p>
+          <p class="site-description motion-element" itemprop="description">AlphaBoom的博客欢迎莅临</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/">
+              <span class="site-state-item-count">12</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/AlphaBoom" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="tencent://message/?uin=2439100920&Site=alphaboom.github.io&Menu=yes" target="_blank" title="QQ">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  QQ
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不去重的状况下有多少种可能"><span class="nav-number">2.1.</span> <span class="nav-text">不去重的状况下有多少种可能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#求通项式"><span class="nav-number">2.2.</span> <span class="nav-text">求通项式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#编写代码计算"><span class="nav-number">2.2.1.</span> <span class="nav-text">编写代码计算</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#求通项代数式"><span class="nav-number">2.3.</span> <span class="nav-text">求通项代数式</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">AlphaBoom</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+  <script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+   <script type="text/javascript">
+        var gitalk = new Gitalk({
+          clientID: 'a6a9a35cef5cdbb6edde',
+          clientSecret: '3f2c90685ef385c63cb4bc8de7d8745a9d359091',
+          repo: 'alphaboom.github.io',
+          owner: 'alphaboom',
+          admin: ['alphaboom'],
+          id: md5(location.pathname),
+          distractionFreeMode: 'true'
+        })
+        gitalk.render('gitalk-container')           
+       </script>
+
+
+  
+  
+
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+  </script>
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+    });
+  </script>
+  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  
+
+  
+
+  
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/assets/shizuku.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config("");
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end --></body>
+</html>

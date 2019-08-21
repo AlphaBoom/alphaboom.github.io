@@ -1,0 +1,728 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Android 自定义控件,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2">
+
+
+
+
+
+
+<meta name="description" content="目标效果查看：打开QQ-&amp;gt;点击个人头像-&amp;gt;点击个性名片-&amp;gt;选择一个名片-&amp;gt;选择效果二。（仅限 vip及以上用户）">
+<meta name="keywords" content="Android 自定义控件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="仿QQ个人信息展示页气泡标签效果">
+<meta property="og:url" content="http://yoursite.com/2016/10/23/20161023/index.html">
+<meta property="og:site_name" content="AlphaBoom">
+<meta property="og:description" content="目标效果查看：打开QQ-&amp;gt;点击个人头像-&amp;gt;点击个性名片-&amp;gt;选择一个名片-&amp;gt;选择效果二。（仅限 vip及以上用户）">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1916010-e8b9596f3f687cc3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://github.com/AlphaBoom/QQPresentation/raw/master/QQPresentation.gif">
+<meta property="og:updated_time" content="2019-08-21T15:14:51.667Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="仿QQ个人信息展示页气泡标签效果">
+<meta name="twitter:description" content="目标效果查看：打开QQ-&amp;gt;点击个人头像-&amp;gt;点击个性名片-&amp;gt;选择一个名片-&amp;gt;选择效果二。（仅限 vip及以上用户）">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1916010-e8b9596f3f687cc3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/10/23/20161023/">
+
+
+  <title> 仿QQ个人信息展示页气泡标签效果 | AlphaBoom </title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">AlphaBoom</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个世界需要更多英雄😁</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                仿QQ个人信息展示页气泡标签效果
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-10-23T03:51:42+08:00" content="2016-10-23">
+              2016-10-23
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>目标效果查看：打开QQ-&gt;点击个人头像-&gt;点击个性名片-&gt;选择一个名片-&gt;选择效果二。<br><img src="http://upload-images.jianshu.io/upload_images/1916010-e8b9596f3f687cc3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt>（仅限 vip及以上用户）<br><a id="more"></a></p>
+<h1 id="分析效果"><a href="#分析效果" class="headerlink" title="分析效果"></a>分析效果</h1></blockquote>
+<ul>
+<li>进入界面正常展示界面（中间头像，背景图片）</li>
+<li>下滑界面依次进行以下动画：<ul>
+<li>整体高度增加及背景模糊化</li>
+<li>头像周围显示光晕</li>
+<li>标签从头像中心向周围扩散</li>
+</ul>
+</li>
+<li>标签在一定范围内随机移动</li>
+<li>上滑恢复正常界面显示 同时进行以下动画：<ul>
+<li>整体高度缩小背景去模糊</li>
+<li>头像光晕隐藏</li>
+<li>标签向头像中心聚集并消失</li>
+</ul>
+</li>
+<li>标签可以拖动，当标签拖动时 头像光晕显示特定动画</li>
+<li>标签拖动到头像显示区域时，头像光晕显示另一种特定动画</li>
+</ul>
+<h1 id="现在实现的效果"><a href="#现在实现的效果" class="headerlink" title="现在实现的效果"></a>现在实现的效果</h1><p><img src="https://github.com/AlphaBoom/QQPresentation/raw/master/QQPresentation.gif" alt>  </p>
+<hr>
+<h1 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h1><h2 id="分析实现需要的步骤"><a href="#分析实现需要的步骤" class="headerlink" title="分析实现需要的步骤"></a>分析实现需要的步骤</h2><p>先分析布局类别分为三个类别：1.最外层的容器 2.气泡标签 3.中间的圆形头像。<br>下面开始对这三个部分分别进行实现</p>
+<h2 id="气泡标签（TagView）"><a href="#气泡标签（TagView）" class="headerlink" title="气泡标签（TagView）"></a>气泡标签（TagView）</h2><blockquote>
+<p>首先对最简单的控件开始，这个控件为一个圆形背景及中间的文字显示区域展示，初看下来可以使用<code>TextView</code>来实现。不过<code>TextView</code> 不好进行测量，而且用到的功能也很简单，所以在这里使用自定义<code>View</code>来实现对于相关文字的绘制使用<code>StaticLayout</code>来辅助实现。</p>
+</blockquote>
+<p>这里对于显示的文字需要做特殊处理，文字分为两个部分：标签名字（最多5个）显示及点赞数量。标签的整体的大小会根据tag中文字的数量来计算。在设置需要显示的信息时初始化<code>StaticLayout</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setSource</span><span class="params">(PresentationLayout.Tag tag)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.tag = tag;</span><br><span class="line">        String summary = tag.getTag();</span><br><span class="line">        <span class="keyword">int</span> count = tag.getCount();</span><br><span class="line">        String countWithBracket;</span><br><span class="line">        <span class="keyword">if</span>(count&lt;=<span class="number">99</span>)&#123;<span class="comment">//对于99以上都显示为99+</span></span><br><span class="line">            countWithBracket = <span class="string">"("</span>+count+<span class="string">")"</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            countWithBracket = <span class="string">"(99+)"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        String source;</span><br><span class="line">        <span class="keyword">int</span> width;</span><br><span class="line">        <span class="keyword">if</span>(summary.length()&lt;=<span class="number">3</span>)&#123;</span><br><span class="line">            source = summary+<span class="string">"\n"</span>+countWithBracket;</span><br><span class="line">            width = (<span class="keyword">int</span>) Math.max(mTextPaint.measureText(countWithBracket),mTextPaint.measureText(summary));</span><br><span class="line"></span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;<span class="comment">// 长度超过3 则按照 第一行2个来显示</span></span><br><span class="line">            source = summary.substring(<span class="number">0</span>,<span class="number">2</span>)+<span class="string">"\n"</span>+summary.substring(<span class="number">2</span>)+<span class="string">"\n"</span>+countWithBracket;</span><br><span class="line">            width = (<span class="keyword">int</span>) Math.max(mTextPaint.measureText(countWithBracket),mTextPaint.measureText(summary.substring(<span class="number">0</span>,<span class="number">3</span>)));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//注意这里mTextPaint 不要设置Align 会造成显示异常</span></span><br><span class="line">        mStaticLayout = <span class="keyword">new</span> StaticLayout(source,mTextPaint,width, Layout.Alignment.ALIGN_CENTER,<span class="number">1f</span>,<span class="number">0</span>,<span class="keyword">false</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>测量时计算出文字区域所需大小及外层绘制圆形所需要的半径大小</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(mStaticLayout == <span class="keyword">null</span>)&#123;</span><br><span class="line">            <span class="keyword">super</span>.onMeasure(widthMeasureSpec,heightMeasureSpec);</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;<span class="comment">//不关心parent的属性 来测量高宽</span></span><br><span class="line">            <span class="keyword">int</span> width = mStaticLayout.getWidth() + originPaddingLeft + originPaddingRight;</span><br><span class="line">            <span class="keyword">int</span> height = mStaticLayout.getHeight() + originPaddingTop + originPaddingBottom;</span><br><span class="line">            <span class="keyword">int</span> diameter = (<span class="keyword">int</span>) Math.hypot(width, height);</span><br><span class="line">            mRadius = <span class="number">0.5f</span>*diameter;</span><br><span class="line">            <span class="keyword">int</span> paddingLeft = (diameter - width) / <span class="number">2</span> + originPaddingLeft;</span><br><span class="line">            <span class="keyword">int</span> paddingRight = (diameter - width) / <span class="number">2</span> + originPaddingRight;</span><br><span class="line">            <span class="keyword">int</span> paddingTop = (diameter - height) / <span class="number">2</span> + originPaddingTop;</span><br><span class="line">            <span class="keyword">int</span> paddingBottom = (diameter - height) / <span class="number">2</span> + originPaddingBottom;</span><br><span class="line">            <span class="comment">//将控制点设为中心 方便之后动画效果的展示</span></span><br><span class="line">            setPivotX(mRadius);</span><br><span class="line">            setPivotY(mRadius);</span><br><span class="line">            <span class="comment">//设置新的padding大小保证圆形背景的绘制</span></span><br><span class="line">            setPadding(paddingLeft,paddingTop,paddingRight,paddingBottom);</span><br><span class="line">            setMeasuredDimension(diameter, diameter);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>绘制效果分为三个部分：圆形背景绘制、圆形边框绘制、文字绘制</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">   protected void onDraw(Canvas canvas) &#123;</span><br><span class="line">       canvas.save();</span><br><span class="line">       //绘制圆形背景</span><br><span class="line">       canvas.drawCircle(mRadius,mRadius,mRadius-mBorderWidth,mBgPaint);</span><br><span class="line">       //绘制圆形边框</span><br><span class="line">       canvas.drawCircle(mRadius,mRadius,mRadius-mBorderWidth,mBorderPaint);</span><br><span class="line">       canvas.translate(getPaddingLeft(),getPaddingTop());</span><br><span class="line">       //绘制文字</span><br><span class="line">       mStaticLayout.draw(canvas);</span><br><span class="line">       canvas.restore();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="圆形头像（PortraitWrapper）"><a href="#圆形头像（PortraitWrapper）" class="headerlink" title="圆形头像（PortraitWrapper）"></a>圆形头像（PortraitWrapper）</h2><blockquote>
+<p>显示圆形头像的控件很多了，这里使用一个ViewGroup 包裹对应控件 并负责绘制光晕</p>
+</blockquote>
+<p>由于需要知道内部控件显示的半径的大小 所以定义一个接口用来获取这个半径</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public interface Circle &#123;</span><br><span class="line">    float getRadius();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里圆形头像展示使用<a href="https://github.com/hdodenhof/CircleImageView" target="_blank" rel="noopener">CircleImageView</a>使用这个控件 实现<code>Circle</code>接口（<code>Circle</code> 声明了<code>getRadius()</code>用于获取半径）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public float getRadius() &#123;</span><br><span class="line">    return mDrawableRadius;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里需要在<code>CircleImageview</code>绘制一层圆形边框及两层光晕,所以对应有3个半径，这里对这3个半径建立对应<code>Property</code>方便动画修改半径</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">Property&lt;PortraitWrapper, Integer&gt; mFirstHaloProperty = <span class="keyword">new</span> Property&lt;PortraitWrapper, Integer&gt;(Integer.class, <span class="string">"firstHalo"</span>) &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Integer <span class="title">get</span><span class="params">(PortraitWrapper object)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> object.mFirstHaloRadius;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(PortraitWrapper object, Integer value)</span> </span>&#123;</span><br><span class="line">            object.mFirstHaloRadius = value;</span><br><span class="line">            ViewCompat.postInvalidateOnAnimation(object);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    Property&lt;PortraitWrapper, Integer&gt; mSecondHaloProperty = <span class="keyword">new</span> Property&lt;PortraitWrapper, Integer&gt;(Integer.class, <span class="string">"secondHalo"</span>) &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Integer <span class="title">get</span><span class="params">(PortraitWrapper object)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> object.mSecondHaloRadius;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(PortraitWrapper object, Integer value)</span> </span>&#123;</span><br><span class="line">            object.mSecondHaloRadius = value;</span><br><span class="line">            ViewCompat.postInvalidateOnAnimation(object);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    Property&lt;PortraitWrapper, Integer&gt; mBorderProperty = <span class="keyword">new</span> Property&lt;PortraitWrapper, Integer&gt;(Integer.class, <span class="string">"borderRadius"</span>) &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Integer <span class="title">get</span><span class="params">(PortraitWrapper object)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> object.mBorderRadius;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(PortraitWrapper object, Integer value)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(isWant|| isDesire) &#123;</span><br><span class="line">                object.mBorderRadius = value;</span><br><span class="line">                ViewCompat.postInvalidateOnAnimation(object);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">``` </span><br><span class="line"></span><br><span class="line">显示动画</span><br><span class="line"></span><br><span class="line">```java</span><br><span class="line">ObjectAnimator step1 = ObjectAnimator.ofInt(<span class="keyword">this</span>, mFirstHaloProperty, mCircleChildRadius + mBorderWidth / <span class="number">2</span>, (mHaloTotalWidth - mBorderWidth) / <span class="number">3</span> + mCircleChildRadius + mBorderWidth / <span class="number">2</span>);</span><br><span class="line">            ObjectAnimator step2 = ObjectAnimator.ofInt(<span class="keyword">this</span>, mSecondHaloProperty, mCircleChildRadius + mBorderWidth / <span class="number">2</span>, (mHaloTotalWidth - mBorderWidth) * <span class="number">2</span> / <span class="number">3</span> + mCircleChildRadius + mBorderWidth / <span class="number">2</span>);</span><br><span class="line">            AnimatorSet set = <span class="keyword">new</span> AnimatorSet();</span><br><span class="line">            set.playTogether(step1, step2);</span><br><span class="line">            mShowAnimator = set;</span><br></pre></td></tr></table></figure>
+<p>隐藏动画</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ObjectAnimator step1 = ObjectAnimator.ofInt(<span class="keyword">this</span>, mFirstHaloProperty, mCircleChildRadius + mBorderWidth / <span class="number">2</span>);</span><br><span class="line">            ObjectAnimator step2 = ObjectAnimator.ofInt(<span class="keyword">this</span>, mSecondHaloProperty, mCircleChildRadius + mBorderWidth / <span class="number">2</span>);</span><br><span class="line">            AnimatorSet set = <span class="keyword">new</span> AnimatorSet();</span><br><span class="line">            set.playTogether(step1, step2);</span><br><span class="line">            mHideAnimator = set;</span><br></pre></td></tr></table></figure>
+<p>当标签拖动时的动画</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> increment = mHaloTotalWidth / <span class="number">3</span>;</span><br><span class="line">            ObjectAnimator step1 = ObjectAnimator.ofInt(<span class="keyword">this</span>, mBorderProperty, mCircleChildRadius, mCircleChildRadius + mBorderWidth / <span class="number">2</span> + increment/<span class="number">2</span>, mCircleChildRadius);</span><br><span class="line">            ObjectAnimator step2 = ObjectAnimator.ofInt(<span class="keyword">this</span>, mFirstHaloProperty, mCircleChildRadius, mCircleChildRadius + (mHaloTotalWidth - mBorderWidth) / <span class="number">3</span> + increment, mCircleChildRadius);</span><br><span class="line">            ObjectAnimator step3 = ObjectAnimator.ofInt(<span class="keyword">this</span>, mSecondHaloProperty, mCircleChildRadius, mCircleChildRadius + (mHaloTotalWidth - mBorderWidth) * <span class="number">2</span> / <span class="number">3</span> + increment, mCircleChildRadius);</span><br><span class="line">            step1.setRepeatCount(ValueAnimator.INFINITE);</span><br><span class="line">            step2.setRepeatCount(ValueAnimator.INFINITE);</span><br><span class="line">            step3.setRepeatCount(ValueAnimator.INFINITE);</span><br><span class="line">            step1.setDuration(<span class="number">1500</span>);</span><br><span class="line">            step2.setDuration(<span class="number">1500</span>);</span><br><span class="line">            step2.setStartDelay(<span class="number">400</span>);</span><br><span class="line">            step3.setDuration(<span class="number">1500</span>);</span><br><span class="line">            step3.setStartDelay(<span class="number">600</span>);</span><br><span class="line">            step1.setInterpolator(<span class="keyword">new</span> AccelerateDecelerateInterpolator());</span><br><span class="line">            step2.setInterpolator(<span class="keyword">new</span> AccelerateDecelerateInterpolator());</span><br><span class="line">            step3.setInterpolator(<span class="keyword">new</span> AccelerateDecelerateInterpolator());</span><br><span class="line">            AnimatorSet set = <span class="keyword">new</span> AnimatorSet();</span><br><span class="line">            set.playTogether(step1, step2, step3);</span><br><span class="line">            mWantAnimator = set;</span><br></pre></td></tr></table></figure>
+<p>当标签拖动到头像中时的动画(这里会有一个颜色alpha值渐渐降低的动画)所以添加修改画笔颜色的<code>Property</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Property&lt;PortraitWrapper,Float&gt; mPaintProperty = <span class="keyword">new</span> Property&lt;PortraitWrapper,Float&gt;(Float.class,<span class="string">"paintAlpha"</span>)&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Float <span class="title">get</span><span class="params">(PortraitWrapper object)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1f</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(PortraitWrapper object, Float value)</span> </span>&#123;</span><br><span class="line">            object.mBorderPaint.setColor(covertAlpha(value,mBorderColor));</span><br><span class="line">            object.mFirstHaloPaint.setColor(covertAlpha(value,mFirstHaloColor));</span><br><span class="line">            object.mSecondHaloPaint.setColor(covertAlpha(value,mSecondHaloColor));</span><br><span class="line">            ViewCompat.postInvalidateOnAnimation(object);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">covertAlpha</span><span class="params">(<span class="keyword">float</span> ratio,<span class="keyword">int</span> color)</span></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> alpha = (<span class="keyword">int</span>) (Color.alpha(color)*ratio);</span><br><span class="line">        <span class="keyword">return</span>  alpha&lt;&lt;<span class="number">24</span>|(color&amp;<span class="number">0xFFFFFF</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> increment = mHaloTotalWidth/<span class="number">4</span>;</span><br><span class="line">            ObjectAnimator step1 = ObjectAnimator.ofInt(<span class="keyword">this</span>,mBorderProperty,mCircleChildRadius+mBorderWidth/<span class="number">2</span>,mCircleChildRadius+mBorderWidth/<span class="number">2</span> + increment);</span><br><span class="line">            ObjectAnimator step2 = ObjectAnimator.ofInt(<span class="keyword">this</span>,mFirstHaloProperty,mCircleChildRadius+mBorderWidth/<span class="number">2</span> + increment,mCircleChildRadius+mBorderWidth/<span class="number">2</span> + increment+increment);</span><br><span class="line">            ObjectAnimator step3 = ObjectAnimator.ofInt(<span class="keyword">this</span>,mSecondHaloProperty,mCircleChildRadius+mBorderWidth/<span class="number">2</span> + increment+increment,mCircleChildRadius+mBorderWidth/<span class="number">2</span> + increment+increment+increment);</span><br><span class="line">            ObjectAnimator step4 = ObjectAnimator.ofFloat(<span class="keyword">this</span>,mPaintProperty,<span class="number">1f</span>,<span class="number">0f</span>);</span><br><span class="line">            step1.setDuration(<span class="number">800</span>);</span><br><span class="line">            step2.setDuration(<span class="number">800</span>);</span><br><span class="line">            step3.setDuration(<span class="number">800</span>);</span><br><span class="line">            step4.setDuration(<span class="number">800</span>);</span><br><span class="line">            step1.setRepeatCount(ValueAnimator.INFINITE);</span><br><span class="line">            step2.setRepeatCount(ValueAnimator.INFINITE);</span><br><span class="line">            step3.setRepeatCount(ValueAnimator.INFINITE);</span><br><span class="line">            step4.setRepeatCount(ValueAnimator.INFINITE);</span><br><span class="line">            step1.setInterpolator(<span class="keyword">new</span> DecelerateInterpolator(<span class="number">2</span>));</span><br><span class="line">            step2.setInterpolator(<span class="keyword">new</span> DecelerateInterpolator(<span class="number">2</span>));</span><br><span class="line">            step3.setInterpolator(<span class="keyword">new</span> DecelerateInterpolator(<span class="number">2</span>));</span><br><span class="line">            AnimatorSet set = <span class="keyword">new</span> AnimatorSet();</span><br><span class="line">            set.playTogether(step1,step2,step3,step4);</span><br><span class="line">            mDesireAnimator = set;</span><br></pre></td></tr></table></figure>
+<h2 id="外层布局（PresentationLayout）"><a href="#外层布局（PresentationLayout）" class="headerlink" title="外层布局（PresentationLayout）"></a>外层布局（PresentationLayout）</h2><blockquote>
+<p>继承至<code>RelativeLayout</code></p>
+</blockquote>
+<h3 id="模糊背景及高度变化"><a href="#模糊背景及高度变化" class="headerlink" title="模糊背景及高度变化"></a>模糊背景及高度变化</h3><p> 为了支持高度变化的动画 添加方法</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setHeight</span><span class="params">(<span class="keyword">int</span> height)</span> </span>&#123;</span><br><span class="line">       getLayoutParams().height = height;</span><br><span class="line">       <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= <span class="number">18</span> ) &#123;</span><br><span class="line">           <span class="keyword">if</span>(!isInLayout()) requestLayout();</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           requestLayout();</span><br><span class="line">       &#125;</span><br><span class="line">       invalidate();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p> 之后就可以获取高度的属性动画：</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ObjectAnimator step1 = ObjectAnimator.ofInt(<span class="keyword">this</span>, <span class="string">"height"</span>, mCollapsedHeight, mExpandHeight);</span><br></pre></td></tr></table></figure>
+<p> 对于背景模糊 是通过在背景之上添加已经模糊之后的图片 并通过修改模糊图片的Alpha值来实现动画效果</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">  * 模糊背景操作任务</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"> <span class="keyword">private</span> Runnable mDoBlurRunnable = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">         Bitmap bitmap = Util.getBitmapFromDrawable(getBackground());</span><br><span class="line">         <span class="keyword">if</span> (mOriginBackground == <span class="keyword">null</span>) mOriginBackground = getBackground();</span><br><span class="line">         <span class="keyword">if</span> (bitmap != <span class="keyword">null</span>) &#123;</span><br><span class="line">             Bitmap blurBitmap = Util.doBlur(getContext(), bitmap, <span class="number">10</span>);</span><br><span class="line">             Drawable newDrawable = <span class="keyword">new</span> BitmapDrawable(getResources(), blurBitmap);</span><br><span class="line">             mBluredBackground = newDrawable;</span><br><span class="line">             Util.setBackground(mBackgroundOverlay, newDrawable);</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;;</span><br></pre></td></tr></table></figure>
+<p> 在初始化之后就<code>View.post(mDoBlurRunnable)</code> 模糊图片。<br> 模糊图片代码：</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 模糊图片</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> context</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> bitmap 需要模糊的原图片</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> radius</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> 模糊后的图片</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Bitmap <span class="title">doBlur</span><span class="params">(Context context,Bitmap bitmap,<span class="keyword">int</span> radius)</span></span>&#123;</span><br><span class="line">    Bitmap result =  Bitmap.createBitmap(bitmap.getWidth(),bitmap.getHeight(), Bitmap.Config.ARGB_8888);</span><br><span class="line">    Canvas canvas = <span class="keyword">new</span> Canvas(result);</span><br><span class="line">    canvas.drawBitmap(bitmap,<span class="number">0</span>,<span class="number">0</span>,<span class="keyword">null</span>);</span><br><span class="line">    RenderScript renderScript = RenderScript.create(context);</span><br><span class="line">    Allocation allocation = Allocation.createFromBitmap(renderScript,result);</span><br><span class="line">    ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(renderScript,allocation.getElement());</span><br><span class="line">    blur.setInput(allocation);</span><br><span class="line">    blur.setRadius(radius);</span><br><span class="line">    blur.forEach(allocation);</span><br><span class="line">    allocation.copyTo(result);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="标签气泡展示及隐藏"><a href="#标签气泡展示及隐藏" class="headerlink" title="标签气泡展示及隐藏"></a>标签气泡展示及隐藏</h3><p>标签的展示及隐藏使用路径动画来实现 路径为二阶Bezier曲线。显示动画 出发点为头像中心点  终点为标签最终要移动到的位置。所有的标签移动到一个圆形的范围中，最多支持7个标签，这7个标签所对应的弧度：</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">double</span>[] RADIUS = <span class="keyword">new</span> <span class="keyword">double</span>[]&#123;<span class="number">0.7</span>d, <span class="number">2.25</span>d, <span class="number">3.14</span>d, <span class="number">5.5</span>d, <span class="number">0.1</span>d, <span class="number">1.4</span>d, <span class="number">4.7</span>d&#125;;</span><br></pre></td></tr></table></figure>
+<p>隐藏则反之。<br>控制点，显示状况下。为了保证曲线的一致性 在标签显示的圆 内部圆 并加上弧度的偏移量计算对应的控制点。隐藏状况下，由于中心点的移动不能使用内部圆的方式保证曲线的一致性，所以单独进行计算（隐藏效果和QQ不太一致）<br>显示情况下计算控制点：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">controlX = Math.round(centerX + mInnerRadius * Math.cos(RADIUS[i] + CONTROL_RADIANS_OFFSET));</span><br><span class="line">controlY = Math.round(centerY - mInnerRadius * Math.sin(RADIUS[i] + CONTROL_RADIANS_OFFSET));</span><br></pre></td></tr></table></figure>
+<p>隐藏情况下计算控制点：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//将centerX 和 centerY 看做坐标原点</span></span><br><span class="line"><span class="keyword">float</span> x = targetX - centerX;</span><br><span class="line"><span class="keyword">float</span> y = targetY - centerY;</span><br><span class="line"><span class="keyword">float</span> scaledX = <span class="number">0.3f</span> * x;</span><br><span class="line"><span class="keyword">float</span> scaledY = <span class="number">0.3f</span> * y;</span><br><span class="line"><span class="comment">//计算控制点 保证bezier曲线的导数相同</span></span><br><span class="line">controlX = centerX + Math.round(scaledX * Math.cos(CONTROL_RADIANS_OFFSET) + scaledY * Math.sin(CONTROL_RADIANS_OFFSET));</span><br><span class="line">controlY = centerY + Math.round(scaledY * Math.cos(CONTROL_RADIANS_OFFSET) - scaledX * Math.sin(CONTROL_RADIANS_OFFSET));</span><br></pre></td></tr></table></figure>
+<p>对于AndroidL 以上可以直接使用 path动画：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pathAnimator = ObjectAnimator.ofObject(tagView, mTagViewProperty, <span class="keyword">null</span>, path);</span><br></pre></td></tr></table></figure>
+<p>对于AnddroidL 以下使用 PathMeasure 帮助进行path动画</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pathAnimator = ObjectAnimator.ofObject(tagView, mTagViewProperty, <span class="keyword">new</span> PathEvaluator(path), <span class="keyword">new</span> PointF());</span><br></pre></td></tr></table></figure>
+<p>TagViewProperty 用于调用TagView 的 setPoint 修改TagView的位置</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setPoint</span><span class="params">(PointF pointF)</span></span>&#123;</span><br><span class="line">        <span class="keyword">float</span> left = pointF.x - getWidth()/<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">float</span> top = pointF.y - getHeight()/<span class="number">2</span>;</span><br><span class="line">        setX(left);</span><br><span class="line">        setY(top);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>对于path 转换为pointF 使用 PathEvaluator 来实现(内部通过PathMeasure计算Path)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PathEvaluator</span> <span class="keyword">implements</span> <span class="title">TypeEvaluator</span>&lt;<span class="title">PointF</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> PathMeasure mPathMeasure;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> mPathLength;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> points[] = <span class="keyword">new</span> <span class="keyword">float</span>[<span class="number">2</span>];</span><br><span class="line">    <span class="keyword">private</span> PointF mPointF = <span class="keyword">new</span> PointF();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">PathEvaluator</span><span class="params">(Path path)</span></span>&#123;</span><br><span class="line">        mPathMeasure = <span class="keyword">new</span> PathMeasure(path,<span class="keyword">false</span>);</span><br><span class="line">        mPathLength = mPathMeasure.getLength();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> PointF <span class="title">evaluate</span><span class="params">(<span class="keyword">float</span> fraction, PointF startValue, PointF endValue)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(mPathMeasure.getPosTan(mPathLength*fraction,points,<span class="keyword">null</span>)) &#123;</span><br><span class="line">            mPointF.set(points[<span class="number">0</span>], points[<span class="number">1</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> mPointF;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="标签气泡的移动"><a href="#标签气泡的移动" class="headerlink" title="标签气泡的移动"></a>标签气泡的移动</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 做tag 周围小幅度移动动画</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> Runnable mTagWanderRunnable = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mState == STATE_EXPANDED) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; mTagViews.size(); i++) &#123;</span><br><span class="line">                TagView tagView = mTagViews.get(i);</span><br><span class="line">                <span class="keyword">if</span> (tagView.shouldWander) &#123;</span><br><span class="line">                    <span class="keyword">float</span> targetX = mTargets[<span class="number">2</span>*i] - tagView.getWidth()/<span class="number">2</span>;</span><br><span class="line">                    <span class="keyword">float</span> targetY = mTargets[<span class="number">2</span>*i+<span class="number">1</span>] - tagView.getHeight()/<span class="number">2</span>;</span><br><span class="line">                    <span class="keyword">float</span> x = Math.round(targetX + Math.random()*mThickness - mThickness/<span class="number">2</span>);</span><br><span class="line">                    <span class="keyword">float</span> y = Math.round(targetY + Math.random()*mThickness - mThickness/<span class="number">2</span>);</span><br><span class="line">                    tagView.animate().translationX(x).translationY(y).setDuration(<span class="number">2000</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            ViewCompat.postOnAnimationDelayed(PresentationLayout.<span class="keyword">this</span>, mTagWanderRunnable, <span class="number">2000</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="标签气泡的拖拽（使用ViewDragHelper）"><a href="#标签气泡的拖拽（使用ViewDragHelper）" class="headerlink" title="标签气泡的拖拽（使用ViewDragHelper）"></a>标签气泡的拖拽（使用ViewDragHelper）</h3><p>由于移动的TagView是同过改变TranslationX 及 TranslationY来移动，而ViewDragHelper 是通过 left top right bottom 判断是否点击到相应的View，所以这里不去捕获View</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryCaptureView</span><span class="params">(View child, <span class="keyword">int</span> pointerId)</span> </span></span><br><span class="line"><span class="function">         </span>&#123;</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">         &#125;</span><br></pre></td></tr></table></figure>
+<p>之后自行处理触摸事件并主动捕获View：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onTouchEvent</span><span class="params">(MotionEvent event)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">super</span>.onTouchEvent(event);</span><br><span class="line">       mDragHelper.processTouchEvent(event);</span><br><span class="line"></span><br><span class="line">           <span class="keyword">switch</span> (MotionEventCompat.getActionMasked(event)) &#123;</span><br><span class="line">               <span class="keyword">case</span> MotionEvent.ACTION_DOWN:</span><br><span class="line">                   downX = event.getX();</span><br><span class="line">                   downY = event.getY();</span><br><span class="line">                   <span class="keyword">if</span>(mState == STATE_EXPANDED)&#123;</span><br><span class="line">                       TagView tagView = findTopTagViewUnder(downX,downY);</span><br><span class="line">                       <span class="keyword">if</span>(tagView != <span class="keyword">null</span>)&#123;</span><br><span class="line">                           mDragHelper.captureChildView(tagView,event.getPointerId(<span class="number">0</span>));</span><br><span class="line">                       &#125;</span><br><span class="line">                   &#125;</span><br><span class="line">                   <span class="keyword">break</span>;</span><br><span class="line">       ...</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> TagView <span class="title">findTopTagViewUnder</span><span class="params">(<span class="keyword">float</span> x,<span class="keyword">float</span> y)</span></span>&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;getChildCount();i++)&#123;</span><br><span class="line">            View child = getChildAt(i);</span><br><span class="line">            <span class="keyword">if</span>(child <span class="keyword">instanceof</span> TagView)&#123;</span><br><span class="line">                <span class="keyword">if</span>(x&gt;=child.getX()&amp;&amp;x&lt;=child.getX()+child.getWidth()&amp;&amp;y&gt;=child.getY()&amp;&amp;y&lt;=child.getY()+child.getHeight())&#123;</span><br><span class="line">                    <span class="keyword">return</span> (TagView) child;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h1 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h1><p><a href="https://github.com/AlphaBoom/QQPresentation" target="_blank" rel="noopener">QQPresentation</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android-自定义控件/" rel="tag">#Android 自定义控件</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/23/201610231/" rel="prev" title="关于Android24.2.0支持库SnapHelper的使用">
+                关于Android24.2.0支持库SnapHelper的使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="gitalk-container"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.jpeg" alt="AlphaBoom">
+          <p class="site-author-name" itemprop="name">AlphaBoom</p>
+          <p class="site-description motion-element" itemprop="description">AlphaBoom的博客欢迎莅临</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/">
+              <span class="site-state-item-count">12</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/AlphaBoom" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="tencent://message/?uin=2439100920&Site=alphaboom.github.io&Menu=yes" target="_blank" title="QQ">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  QQ
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#分析效果"><span class="nav-number">1.</span> <span class="nav-text">分析效果</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#现在实现的效果"><span class="nav-number">2.</span> <span class="nav-text">现在实现的效果</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#具体实现"><span class="nav-number">3.</span> <span class="nav-text">具体实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#分析实现需要的步骤"><span class="nav-number">3.1.</span> <span class="nav-text">分析实现需要的步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#气泡标签（TagView）"><span class="nav-number">3.2.</span> <span class="nav-text">气泡标签（TagView）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#圆形头像（PortraitWrapper）"><span class="nav-number">3.3.</span> <span class="nav-text">圆形头像（PortraitWrapper）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#外层布局（PresentationLayout）"><span class="nav-number">3.4.</span> <span class="nav-text">外层布局（PresentationLayout）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#模糊背景及高度变化"><span class="nav-number">3.4.1.</span> <span class="nav-text">模糊背景及高度变化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#标签气泡展示及隐藏"><span class="nav-number">3.4.2.</span> <span class="nav-text">标签气泡展示及隐藏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#标签气泡的移动"><span class="nav-number">3.4.3.</span> <span class="nav-text">标签气泡的移动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#标签气泡的拖拽（使用ViewDragHelper）"><span class="nav-number">3.4.4.</span> <span class="nav-text">标签气泡的拖拽（使用ViewDragHelper）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#项目地址"><span class="nav-number">4.</span> <span class="nav-text">项目地址</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">AlphaBoom</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+  <script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+   <script type="text/javascript">
+        var gitalk = new Gitalk({
+          clientID: 'a6a9a35cef5cdbb6edde',
+          clientSecret: '3f2c90685ef385c63cb4bc8de7d8745a9d359091',
+          repo: 'alphaboom.github.io',
+          owner: 'alphaboom',
+          admin: ['alphaboom'],
+          id: md5(location.pathname),
+          distractionFreeMode: 'true'
+        })
+        gitalk.render('gitalk-container')           
+       </script>
+
+
+  
+  
+
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+  </script>
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+    });
+  </script>
+  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+  
+
+  
+
+  
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/assets/shizuku.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config("");
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end --></body>
+</html>
